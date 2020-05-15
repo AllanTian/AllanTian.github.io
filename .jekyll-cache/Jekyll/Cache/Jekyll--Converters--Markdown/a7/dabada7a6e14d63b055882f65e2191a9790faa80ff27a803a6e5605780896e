@@ -1,0 +1,199 @@
+I"H<p>今天分享的主题是《Lambda 表达式》，这也是之前一些读者留言强烈要求我写一写的，不好意思，让你们久等了，现在来满足你们，为时不晚吧？</p>
+
+<!--more-->
+
+<p><img src="http://www.itwanger.com/assets/images/2020/02/Lambda-02.png" alt="" /></p>
+
+<h3 id="01初识-lambda">01、初识 Lambda</h3>
+
+<p>Lambda 表达式描述了一个代码块（或者叫匿名方法），可以将其作为参数传递给构造方法或者普通方法以便后续执行。考虑下面这段代码：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">()</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"沉默王二"</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>来从左到右解释一下，<code class="highlighter-rouge">()</code> 为 Lambda 表达式的参数列表（本例中没有参数），<code class="highlighter-rouge">-&gt;</code> 标识这串代码为 Lambda 表达式（也就是说，看到 <code class="highlighter-rouge">-&gt;</code> 就知道这是 Lambda），<code class="highlighter-rouge">System.out.println("沉默王二")</code> 为要执行的代码，即将“沉默王二”打印到标准输出流。</p>
+
+<p>有点 Java 基础的同学应该不会对 Runnable 接口感到陌生，这是多线程的一个基础接口，它的定义如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@FunctionalInterface</span>
+<span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Runnable</span>
+<span class="o">{</span>
+   <span class="kd">public</span> <span class="kd">abstract</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Runnable 接口非常简单，仅有一个抽象方法 <code class="highlighter-rouge">run()</code>；细心的同学会发现一个陌生的注解 <code class="highlighter-rouge">@FunctionalInterface</code>，这个注解是什么意思呢？</p>
+
+<p>我看了它的源码，里面有这样一段注释：</p>
+
+<blockquote>
+  <p>Note that instances of functional interfaces can be created with lambda expressions, method references, or constructor references.</p>
+</blockquote>
+
+<p>大致的意思就是说，通过 <code class="highlighter-rouge">@FunctionalInterface</code> 标记的接口可以通过 Lambda 表达式创建实例。具体怎么表现呢？</p>
+
+<p>原来我们创建一个线程并启动它是这样的：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LamadaTest</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"沉默王二"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">}).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>通过 Lambda 表达式呢？只需要下面这样：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LamadaTest</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"沉默王二"</span><span class="o">)).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>是不是很妙！比起匿名内部类，Lambda 表达式不仅易于理解，更大大简化了必须编写的代码数量。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2020/02/Lambda-03.png" alt="" /></p>
+
+<h3 id="02lambda-语法">02、Lambda 语法</h3>
+
+<p>每个 Lambda 表达式都遵循以下法则：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>( parameter-list ) -&gt; { expression-or-statements }
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">()</code> 中的 <code class="highlighter-rouge">parameter-list</code> 是以逗号分隔的参数。你可以指定参数的类型，也可以不指定（编译器会根据上下文进行推断）。Java 11 后，还可以使用 <code class="highlighter-rouge">var</code> 关键字作为参数类型，有点 JavaScript 的味道。</p>
+
+<p><code class="highlighter-rouge">-&gt;</code> 相当于 Lambda 的标识符，就好像见到圣旨就见到了皇上。</p>
+
+<p><code class="highlighter-rouge">{}</code> 中的 <code class="highlighter-rouge">expression-or-statements</code> 为 Lambda 的主体，可以是一行语句，也可以多行。</p>
+
+<p>可以通过 Lambda 表达式干很多事情，比如说</p>
+
+<p>1）为变量赋值，示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="o">()</span> <span class="o">-&gt;</span> <span class="o">{</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"沉默王二"</span><span class="o">);</span> <span class="o">};</span>
+<span class="n">r</span><span class="o">.</span><span class="na">run</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p>2）作为 return 结果，示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">static</span> <span class="nc">FileFilter</span> <span class="nf">getFilter</span><span class="o">(</span><span class="nc">String</span> <span class="n">ext</span><span class="o">)</span>
+<span class="o">{</span>
+    <span class="k">return</span> <span class="o">(</span><span class="n">pathname</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">pathname</span><span class="o">.</span><span class="na">toString</span><span class="o">().</span><span class="na">endsWith</span><span class="o">(</span><span class="n">ext</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>3）作为数组元素，示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">final</span> <span class="nc">PathMatcher</span> <span class="n">matchers</span><span class="o">[]</span> <span class="o">=</span>
+<span class="o">{</span>
+        <span class="o">(</span><span class="n">path</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">path</span><span class="o">.</span><span class="na">toString</span><span class="o">().</span><span class="na">endsWith</span><span class="o">(</span><span class="s">"txt"</span><span class="o">),</span>
+        <span class="o">(</span><span class="n">path</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">path</span><span class="o">.</span><span class="na">toString</span><span class="o">().</span><span class="na">endsWith</span><span class="o">(</span><span class="s">"java"</span><span class="o">)</span>
+<span class="o">};</span>
+</code></pre></div></div>
+
+<p>4）作为普通方法或者构造方法的参数，示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">new</span> <span class="nc">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"沉默王二"</span><span class="o">)).</span><span class="na">start</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p>需要注意 Lambda 表达式的作用域范围。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="kt">int</span> <span class="n">limit</span> <span class="o">=</span> <span class="mi">10</span><span class="o">;</span>
+    <span class="nc">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="o">()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">limit</span> <span class="o">=</span> <span class="mi">5</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">limit</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+    <span class="o">};</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>上面这段代码在编译的时候会提示错误：变量 limit 已经定义过了。</p>
+
+<p>和匿名内部类一样，不要在 Lambda 表达式主体内对方法内的局部变量进行修改，否则编译也不会通过：Lambda 表达式中使用的变量必须是 final 的。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2020/02/Lambda-04.png" alt="" /></p>
+
+<h3 id="03lambda-和-this-关键字">03、Lambda 和 this 关键字</h3>
+
+<p>Lambda 表达式并不会引入新的作用域，这一点和匿名内部类是不同的。也就是说，Lambda 表达式主体内使用的 this 关键字和其所在的类实例相同。</p>
+
+<p>来看下面这个示例。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LamadaTest</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">new</span> <span class="nf">LamadaTest</span><span class="o">().</span><span class="na">work</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">work</span><span class="o">()</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"this = %s%n"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+
+        <span class="nc">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span>
+        <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span>
+            <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"this = %s%n"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(</span><span class="n">r</span><span class="o">).</span><span class="na">start</span><span class="o">();</span>
+        <span class="k">new</span> <span class="nf">Thread</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"this = %s%n"</span><span class="o">,</span> <span class="k">this</span><span class="o">)).</span><span class="na">start</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Tips：<code class="highlighter-rouge">%s</code> 代表当前位置输出字符串，<code class="highlighter-rouge">%n</code> 代表换行符，也可以使用 <code class="highlighter-rouge">\n</code> 代替，但 <code class="highlighter-rouge">%n</code> 是跨平台的。</p>
+
+<p><code class="highlighter-rouge">work()</code> 方法中的代码可以分为 3 个部分：</p>
+
+<p>1）单独的 this 关键字</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"this = %s%n"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>其中 this 为 <code class="highlighter-rouge">main()</code> 方法中通过 new 关键字创建的 LamadaTest 对象——<code class="highlighter-rouge">new LamadaTest()</code>。</p>
+
+<p>2）匿名内部类中的 this 关键字</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Runnable</span> <span class="n">r</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span>
+<span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span>
+    <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">printf</span><span class="o">(</span><span class="s">"this = %s%n"</span><span class="o">,</span> <span class="k">this</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+</code></pre></div></div>
+
+<p>其中 this 为 <code class="highlighter-rouge">work()</code> 方法中通过 new 关键字创建的 Runnable 对象——<code class="highlighter-rouge">new Runnable(){...}</code>。</p>
+
+<p>3）Lambda 表达式中的 this 关键字</p>
+
+<p>其中 this 关键字和 1）中的相同。</p>
+
+<p>我们来看一下程序的输出结果：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">this</span> <span class="o">=</span> <span class="n">com</span><span class="o">.</span><span class="na">cmower</span><span class="o">.</span><span class="na">java_demo</span><span class="o">.</span><span class="na">journal</span><span class="o">.</span><span class="na">LamadaTest</span><span class="err">@</span><span class="mi">3</span><span class="n">feba861</span>
+<span class="k">this</span> <span class="o">=</span> <span class="n">com</span><span class="o">.</span><span class="na">cmower</span><span class="o">.</span><span class="na">java_demo</span><span class="o">.</span><span class="na">journal</span><span class="o">.</span><span class="na">LamadaTest</span><span class="err">$</span><span class="mi">1</span><span class="err">@</span><span class="mi">64</span><span class="n">f033cb</span>
+<span class="k">this</span> <span class="o">=</span> <span class="n">com</span><span class="o">.</span><span class="na">cmower</span><span class="o">.</span><span class="na">java_demo</span><span class="o">.</span><span class="na">journal</span><span class="o">.</span><span class="na">LamadaTest</span><span class="err">@</span><span class="mi">3</span><span class="n">feba861</span>
+</code></pre></div></div>
+
+<p>符合我们分析的预期。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2020/02/Lambda-05.png" alt="" /></p>
+
+<h3 id="04最后">04、最后</h3>
+
+<p>尽管 Lambda 表达式在简化 Java 编程方面做了很多令人惊讶的努力，但在某些情况下，不当的使用仍然会导致不必要的混乱，大家伙慎用。</p>
+
+<p>好了，我亲爱的读者朋友们，以上就是本文的全部内容了。原创不易，如果觉得有点用的话，请不要吝啬你手中<strong>点赞</strong>的权力——因为这将是我写作的最强动力。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/cmower_3.png" alt="" /></p>
+:ET

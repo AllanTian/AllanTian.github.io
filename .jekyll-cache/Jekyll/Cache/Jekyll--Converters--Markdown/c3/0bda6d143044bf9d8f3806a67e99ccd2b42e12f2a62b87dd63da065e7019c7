@@ -1,0 +1,299 @@
+I"d�<p>对于Java I/O来说，I意味着Input（输入），O意味着Output（输出）。读书写作并非易事，而创建一个好的I/O系统更是一项艰难的任务。</p>
+
+<!--more-->
+
+<p>古人云：“读书破万卷，下笔如有神”。也就是说，只有大量的阅读，写作的时候才能风生水起——写作意味着输出（我的知识传播给他人），而读书意味着输入（从他人的知识中汲取营养）。</p>
+
+<h3 id="01数据流之字节与字符">01、数据流之字节与字符</h3>
+
+<p>Java所有的I/O机制都是基于<strong>数据流</strong>进行的输入输出。数据流可分为两种：</p>
+
+<p>1）字节流，未经加工的原始二进制数据，最小的数据单元是<strong>字节</strong>。</p>
+
+<p>2）字符流，经过一定编码处理后符合某种格式规定的数据，最小的数据单元是<strong>字符</strong>——占用两个字节。</p>
+
+<p><code class="highlighter-rouge">OutputStream</code>和<code class="highlighter-rouge">InputStream</code>用来处理字节流；<code class="highlighter-rouge">Writer</code>和<code class="highlighter-rouge">Reader</code>用来处理字符流；<code class="highlighter-rouge">OutputStreamWriter</code>可以把<code class="highlighter-rouge">OutputStream</code>转换为<code class="highlighter-rouge">Writer</code>，<code class="highlighter-rouge">InputStreamReader</code>可以把<code class="highlighter-rouge">InputStream</code>转换为<code class="highlighter-rouge">Reader</code>。</p>
+
+<p>Java的设计者为此设计了众多的类，见下图。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-io-1.png" alt="" /></p>
+
+<p>看到这么多类，你一定感觉头晕目眩。反正我已经看得不耐烦了。搞这么多类，看起来头真的大——这也从侧面说明实际的应用场景各有各的不同——你也完全不用担心，因为实际项目当中，根本就不可能全用到（我就没用过<code class="highlighter-rouge">SequenceOutputStream</code>）。</p>
+
+<p>我建议你在<strong>学习的时候要掌握一种“挑三拣四”的能力</strong>——学习自己感兴趣的、必须掌握的、对能力有所提升的知识。切不可囫囵吞枣，强迫自己什么都学。什么都学，最后的结果可能是什么都不会。</p>
+
+<p>字符流是基于字节流的，因此，我们先来学习一下字节流的两个最基础的类——<code class="highlighter-rouge">OutputStream</code>和<code class="highlighter-rouge">InputStream</code>，它们是必须要掌握的。</p>
+
+<p>1）OutputStream</p>
+
+<p><code class="highlighter-rouge">OutputStream</code>提供了4个非常有用的方法，如下。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">public void write(byte b[])</code>：将数组b中的字节写到输出流。</li>
+  <li><code class="highlighter-rouge">public void write(byte b[], int off, int len)</code>：将数组b的从偏移量off开始的len个字节写到输出流。</li>
+  <li><code class="highlighter-rouge">public void flush()</code> : 将数据缓冲区中数据全部输出，并清空缓冲区。</li>
+  <li><code class="highlighter-rouge">public void close()</code> : 关闭输出流并释放与流相关的系统资源。</li>
+</ul>
+
+<p>其子类<code class="highlighter-rouge">ByteArrayOutputStream</code>和<code class="highlighter-rouge">BufferedOuputStream</code>最为常用（File相关类放在下个小节）。</p>
+
+<p>①、<code class="highlighter-rouge">ByteArrayOutputStream</code>通常用于在内存中创建一个字节数组缓冲区，数据被“临时”放在此缓冲区中，并不会输出到文件或者网络套接字中——就好像一个中转站，负责把输入流中的数据读入到内存缓冲区中，你可以调用它的<code class="highlighter-rouge">toByteArray()</code>方法来获取字节数组。</p>
+
+<p>来看下例。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">readBytes</span><span class="o">(</span><span class="nc">InputStream</span> <span class="n">in</span><span class="o">,</span> <span class="kt">long</span> <span class="n">length</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+	<span class="nc">ByteArrayOutputStream</span> <span class="n">bo</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ByteArrayOutputStream</span><span class="o">();</span>
+	<span class="kt">byte</span><span class="o">[]</span> <span class="n">buffer</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span>
+	<span class="kt">int</span> <span class="n">read</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+	<span class="k">while</span> <span class="o">(</span><span class="n">read</span> <span class="o">&lt;</span> <span class="n">length</span><span class="o">)</span> <span class="o">{</span>
+		<span class="kt">int</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">in</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="nc">Math</span><span class="o">.</span><span class="na">min</span><span class="o">(</span><span class="mi">1024</span><span class="o">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">read</span><span class="o">));</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">cur</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">break</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="n">read</span> <span class="o">+=</span> <span class="n">cur</span><span class="o">;</span>
+		<span class="n">bo</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buffer</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">cur</span><span class="o">);</span>
+	<span class="o">}</span>
+	<span class="k">return</span> <span class="n">bo</span><span class="o">.</span><span class="na">toByteArray</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">ByteArrayOutputStream</code>的责任就是把<code class="highlighter-rouge">InputStream</code>中的字节流“一字不差”的读出来——这个工具方法很重要，很重要，很重要——可以解决粘包的问题。</p>
+
+<p>②、<code class="highlighter-rouge">BufferedOuputStream</code>实现了一个缓冲输出流，可以将很多小的数据缓存为一个大块的数据，然后一次性地输出到文件或者网络套接字中——这里的“缓冲”和<code class="highlighter-rouge">ByteArrayOutputStream</code>的“缓冲”有着很大的不同——前者是为了下一次的一次性输出，后者就是单纯的为了缓冲，不存在输出。</p>
+
+<p>来看下例。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">protected</span> <span class="kt">void</span> <span class="nf">write</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+	<span class="n">out</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">intToByte</span><span class="o">(</span><span class="n">data</span><span class="o">.</span><span class="na">length</span><span class="o">));</span>
+	<span class="n">out</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">data</span><span class="o">);</span>
+	<span class="n">out</span><span class="o">.</span><span class="na">flush</span><span class="o">();</span>
+	<span class="n">out</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">intToByte</span><span class="o">(</span><span class="kt">int</span> <span class="n">num</span><span class="o">)</span>
+<span class="o">{</span>
+    <span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span><span class="o">];</span>
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">data</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+    <span class="o">{</span>
+        <span class="n">data</span><span class="o">[</span><span class="mi">3</span><span class="o">-</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="o">(</span><span class="kt">byte</span><span class="o">)(</span><span class="n">num</span> <span class="o">%</span> <span class="mi">256</span><span class="o">);</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">num</span> <span class="o">/</span> <span class="mi">256</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">data</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>使用<code class="highlighter-rouge">BufferedOuputStream</code>的时候，一定要记得调用<code class="highlighter-rouge">flush()</code>方法将数据从缓冲区中全部输出。使用完毕后，调用<code class="highlighter-rouge">close()</code>方法关闭输出流，释放与流相关的系统资源。</p>
+
+<p>2）InputStream</p>
+
+<p><code class="highlighter-rouge">InputStream</code>也提供了4个非常有用的方法，如下。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">public int read(byte b[])</code>：读取b.length个字节的数据放到数组b中，返回值是读取的字节数。</li>
+  <li><code class="highlighter-rouge">public int read(byte b[], int off, int len)</code>：从输入流中最多读取len个字节的数据，存放到偏移量为off的数组b中。</li>
+  <li><code class="highlighter-rouge">public int available()</code>：返回输入流中可以读取的字节数。</li>
+  <li><code class="highlighter-rouge">public int close()</code> ：使用完后，对打开的流进行关闭。</li>
+</ul>
+
+<p>其子类<code class="highlighter-rouge">BufferedInputStream</code>（缓冲输入流）最为常用，效率最高（当我们不确定读入的是大数据还是小数据）。</p>
+
+<p>无缓冲流上的每个读取请求通常会导致对操作系统的调用以读取所请求的字节数——进行系统调用的开销非常大。但缓冲输入流就不一样了，它通过对内部缓冲区执行（例如）高达8k字节的大量读取，然后针对缓冲区的大小再分配字节来减少系统调用的开销——性能会提高很多。</p>
+
+<p>使用示例如下。</p>
+
+<p>先来看一个辅助方法<code class="highlighter-rouge">byteToInt</code>，把字节转换成int。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">int</span> <span class="nf">byteToInt</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">b</span><span class="o">)</span> <span class="o">{</span>
+	<span class="kt">int</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+	<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">b</span><span class="o">.</span><span class="na">length</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+		<span class="n">num</span><span class="o">*=</span><span class="mi">256</span><span class="o">;</span>
+		<span class="n">num</span><span class="o">+=(</span><span class="n">b</span><span class="o">[</span><span class="n">i</span><span class="o">]+</span><span class="mi">256</span><span class="o">)%</span><span class="mi">256</span><span class="o">;</span>
+	<span class="o">}</span>
+	<span class="k">return</span> <span class="n">num</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>再来看如何从输入流中，根据指定的长度contentLength来读取数据。<code class="highlighter-rouge">readBytes()</code>方法在之前已经提到过。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">BufferedInputStream</span> <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedInputStream</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">());</span>
+
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">tmpByte</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">4</span><span class="o">];</span>
+<span class="c1">// 读取四个字节判断消息长度</span>
+<span class="n">in</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">tmpByte</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span>
+<span class="c1">// 将byte转为int</span>
+<span class="kt">int</span> <span class="n">contentLength</span> <span class="o">=</span> <span class="n">byteToInt</span><span class="o">(</span><span class="n">tmpByte</span><span class="o">);</span>
+
+<span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">contentLength</span> <span class="o">&gt;</span> <span class="n">in</span><span class="o">.</span><span class="na">available</span><span class="o">())</span> <span class="o">{</span>
+	<span class="c1">// 之前提到的方法</span>
+	<span class="n">buf</span> <span class="o">=</span> <span class="n">readBytes</span><span class="o">(</span><span class="n">in</span><span class="o">,</span> <span class="n">contentLength</span><span class="o">);</span>
+<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+	<span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="n">contentLength</span><span class="o">];</span>
+	<span class="n">in</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">contentLength</span><span class="o">);</span>
+
+	<span class="c1">// 发生粘包了</span>
+	<span class="k">if</span> <span class="o">(</span><span class="n">in</span><span class="o">.</span><span class="na">available</span><span class="o">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>我敢保证，只要你搞懂了字节流，字符流也就不在话下——所以，我们在此略过字符流。</p>
+
+<h3 id="02file类">02、File类</h3>
+
+<p>前面我们了解到，数据有两种格式：字节与字符。那么这些数据从哪里来，又存往何处呢？</p>
+
+<p>一个主要的方式就是从物理磁盘上进行读取和存储，磁盘的唯一最小描述就是文件。也就是说上层应用程序只能通过文件来操作磁盘上的数据，文件也是操作系统和磁盘驱动器交互的一个最小单元。</p>
+
+<p>在Java中，通常用<code class="highlighter-rouge">File</code>类来操作文件。当然了，File不止是文件，它也是文件夹（目录）。File类保存了文件或目录的各种元数据信息（文件名、文件长度、最后修改时间、是否可读、当前文件的路径名等等）。</p>
+
+<p>通过File类以及文件输入输出流（<code class="highlighter-rouge">FileInputStream</code>、<code class="highlighter-rouge">FileOutputStream</code>），可以轻松地创建、删除、复制文件或者目录。</p>
+
+<p>这里，我提供给你一个实用的文件工具类——FileUtils。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 文件操作工具类
+ * 实现文件的创建、删除、复制、压缩、解压以及目录的创建、删除、复制、压缩解压等功能
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">FileUtils</span> <span class="kd">extends</span> <span class="n">org</span><span class="o">.</span><span class="na">apache</span><span class="o">.</span><span class="na">commons</span><span class="o">.</span><span class="na">io</span><span class="o">.</span><span class="na">FileUtils</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * 复制单个文件
+	 * @param srcFileName 待复制的文件名
+	 * @param descFileName 目标文件名
+	 * @param coverlay 如果目标文件已存在，是否覆盖
+	 * @return 如果复制成功，则返回true，否则返回false
+	 */</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">boolean</span> <span class="nf">copyFileCover</span><span class="o">(</span><span class="nc">String</span> <span class="n">srcFileName</span><span class="o">,</span>
+			<span class="nc">String</span> <span class="n">descFileName</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">coverlay</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">File</span> <span class="n">srcFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">srcFileName</span><span class="o">);</span>
+		<span class="c1">// 判断源文件是否存在</span>
+		<span class="k">if</span> <span class="o">(!</span><span class="n">srcFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"复制文件失败，源文件 "</span> <span class="o">+</span> <span class="n">srcFileName</span> <span class="o">+</span> <span class="s">" 不存在!"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="c1">// 判断源文件是否是合法的文件</span>
+		<span class="k">else</span> <span class="nf">if</span> <span class="o">(!</span><span class="n">srcFile</span><span class="o">.</span><span class="na">isFile</span><span class="o">())</span> <span class="o">{</span>
+			<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"复制文件失败，"</span> <span class="o">+</span> <span class="n">srcFileName</span> <span class="o">+</span> <span class="s">" 不是一个文件!"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="nc">File</span> <span class="n">descFile</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">File</span><span class="o">(</span><span class="n">descFileName</span><span class="o">);</span>
+		<span class="c1">// 判断目标文件是否存在</span>
+		<span class="k">if</span> <span class="o">(</span><span class="n">descFile</span><span class="o">.</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+			<span class="c1">// 如果目标文件存在，并且允许覆盖</span>
+			<span class="k">if</span> <span class="o">(</span><span class="n">coverlay</span><span class="o">)</span> <span class="o">{</span>
+				<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"目标文件已存在，准备删除!"</span><span class="o">);</span>
+				<span class="k">if</span> <span class="o">(!</span><span class="nc">FileUtils</span><span class="o">.</span><span class="na">delFile</span><span class="o">(</span><span class="n">descFileName</span><span class="o">))</span> <span class="o">{</span>
+					<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"删除目标文件 "</span> <span class="o">+</span> <span class="n">descFileName</span> <span class="o">+</span> <span class="s">" 失败!"</span><span class="o">);</span>
+					<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+				<span class="o">}</span>
+			<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+				<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"复制文件失败，目标文件 "</span> <span class="o">+</span> <span class="n">descFileName</span> <span class="o">+</span> <span class="s">" 已存在!"</span><span class="o">);</span>
+				<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+			<span class="o">}</span>
+		<span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+			<span class="k">if</span> <span class="o">(!</span><span class="n">descFile</span><span class="o">.</span><span class="na">getParentFile</span><span class="o">().</span><span class="na">exists</span><span class="o">())</span> <span class="o">{</span>
+				<span class="c1">// 如果目标文件所在的目录不存在，则创建目录</span>
+				<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"目标文件所在的目录不存在，创建目录!"</span><span class="o">);</span>
+				<span class="c1">// 创建目标文件所在的目录</span>
+				<span class="k">if</span> <span class="o">(!</span><span class="n">descFile</span><span class="o">.</span><span class="na">getParentFile</span><span class="o">().</span><span class="na">mkdirs</span><span class="o">())</span> <span class="o">{</span>
+					<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"创建目标文件所在的目录失败!"</span><span class="o">);</span>
+					<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>限于篇幅，就不贴太多代码了，需要的话找我（微信：qing_gee）要。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">public static boolean createFile(String descFileName)</code>：创建文件。</li>
+  <li><code class="highlighter-rouge">public static boolean createDirectory(String descDirName)</code>：创建目录。</li>
+  <li><code class="highlighter-rouge">public static boolean copyFile(String srcFileName, String descFileName)</code>：复制文件。</li>
+  <li><code class="highlighter-rouge">public static boolean copyDirectory(String srcDirName, String descDirName)</code>：复制目录。</li>
+  <li><code class="highlighter-rouge">public static boolean deleteFile(String fileName)</code>：删除文件。</li>
+  <li><code class="highlighter-rouge">public static boolean deleteDirectory(String dirName)</code>：删除目录。</li>
+  <li><code class="highlighter-rouge">public static void writeToFile(String fileName, String content, boolean append)</code>：向文件中写入内容。</li>
+</ul>
+
+<h3 id="03网络套接字socket">03、网络套接字——Socket</h3>
+
+<p>虽然网络套接字（<code class="highlighter-rouge">Socket</code>）并不在java.io包下，但它和输入输出流密切相关。<code class="highlighter-rouge">File</code>和<code class="highlighter-rouge">Socket</code>是两组主要的数据传输方式。</p>
+
+<p><code class="highlighter-rouge">Socket</code>是描述计算机之间完成相互通信的一种抽象。可以把 <code class="highlighter-rouge">Socket</code>比作为两个城市之间的交通工具，有了交通工具（高铁、汽车），就可以在城市之间来回穿梭了。交通工具有多种，每种交通工具也有相应的交通规则。<code class="highlighter-rouge">Socket</code>也一样，也有多种。大部分情况下，我们使用的都是基于<code class="highlighter-rouge">TCP/IP</code>的套接字——一种稳定的通信协议。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-io-2.png" alt="" /></p>
+
+<p>假设主机A是客户端，主机B是服务器端。客户端要与服务器端通信，客户端首先要创建一个<code class="highlighter-rouge">Socket</code>实例，操作系统将为这个<code class="highlighter-rouge">Socket</code>实例分配一个没有被使用的本地端口号，并创建一个套接字数据结构，直到这个连接关闭。</p>
+
+<p>示例如下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Socket</span> <span class="n">socket</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Socket</span><span class="o">(</span><span class="n">serverIp</span><span class="o">,</span> <span class="n">serverPort</span><span class="o">);</span>
+<span class="nc">BufferedInputStream</span> <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedInputStream</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">());</span>
+<span class="nc">BufferedOutputStream</span> <span class="n">out</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedOutputStream</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">());</span>
+</code></pre></div></div>
+
+<p>与之对应的，服务端需要创建一个<code class="highlighter-rouge">ServerSocket</code>实例，之后调用<code class="highlighter-rouge">accept()</code>方法进入阻塞状态，等待客户端的请求。当一个新的请求到来时，将为这个连接创建一个新的套接字数据结构。</p>
+
+<p>示例如下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">ServerSocket</span> <span class="n">server</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ServerSocket</span><span class="o">(</span><span class="n">port</span><span class="o">);</span>
+<span class="nc">Socket</span> <span class="n">socket</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="na">accept</span><span class="o">();</span>
+<span class="nc">InputStream</span> <span class="n">in</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedInputStream</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getInputStream</span><span class="o">());</span>
+<span class="nc">OutputStream</span> <span class="n">out</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">BufferedOutputStream</span><span class="o">(</span><span class="n">socket</span><span class="o">.</span><span class="na">getOutputStream</span><span class="o">());</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Socket</code>一旦打通，就可以通过<code class="highlighter-rouge">InputStream</code>和<code class="highlighter-rouge">OutputStream</code>进行数据传输了。</p>
+
+<h3 id="04压缩">04、压缩</h3>
+
+<p>Java I/O 支持压缩格式的数据流。在<code class="highlighter-rouge">Socket</code>通信中，我常用<code class="highlighter-rouge">GZIPOutputStream</code>和<code class="highlighter-rouge">GZIPInputStream</code>来对数据流进行简单地压缩和解压。</p>
+
+<p>压缩的好处就在于能够减小网络传输中数据的体积。代码如下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * 压缩解压
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CompressionUtil</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">compress</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+
+		<span class="nc">ByteArrayOutputStream</span> <span class="n">bos</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ByteArrayOutputStream</span><span class="o">();</span>
+		<span class="kt">byte</span><span class="o">[]</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+		<span class="nc">GZIPOutputStream</span> <span class="n">zos</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GZIPOutputStream</span><span class="o">(</span><span class="n">bos</span><span class="o">);</span>
+		<span class="n">zos</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">data</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">result</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">deCompress</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">in</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">IOException</span> <span class="o">{</span>
+
+		<span class="nc">ByteArrayOutputStream</span> <span class="n">outStream</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ByteArrayOutputStream</span><span class="o">();</span>
+		<span class="nc">GZIPInputStream</span> <span class="n">inStream</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">GZIPInputStream</span><span class="o">(</span><span class="k">new</span> <span class="nc">ByteArrayInputStream</span><span class="o">(</span><span class="n">in</span><span class="o">));</span>
+
+		<span class="kt">byte</span><span class="o">[]</span> <span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="kt">byte</span><span class="o">[</span><span class="mi">1024</span><span class="o">];</span>
+		<span class="k">while</span> <span class="o">(</span><span class="kc">true</span><span class="o">)</span> <span class="o">{</span>
+			<span class="k">try</span> <span class="o">{</span>
+				<span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="n">inStream</span><span class="o">.</span><span class="na">read</span><span class="o">(</span><span class="n">buf</span><span class="o">);</span>
+				<span class="k">if</span> <span class="o">(</span><span class="n">size</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="o">)</span>
+					<span class="k">break</span><span class="o">;</span>
+				<span class="n">outStream</span><span class="o">.</span><span class="na">write</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="n">size</span><span class="o">);</span>
+			<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+				<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+				<span class="k">break</span><span class="o">;</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+
+		<span class="k">return</span> <span class="n">outStream</span><span class="o">.</span><span class="na">toByteArray</span><span class="o">();</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<p>上一篇：<a href="http://www.itwanger.com/java/2019/11/08/java-annotation.html">Java注解（Annotation）：请不要小看我！</a></p>
+
+<p>下一篇：<a href="http://www.itwanger.com/java/2019/11/09/java-bingfa.html">Java：并发不易，先学会用</a></p>
+
+<p>微信搜索「<strong>沉默王二</strong>」公众号，关注后回复「<strong>免费视频</strong>」获取 500G 高质量教学视频（<a href="https://mp.weixin.qq.com/s/GjkEyPW0vgIvuDLYQkBM0A">已分门别类</a>）。</p>
+
+:ET

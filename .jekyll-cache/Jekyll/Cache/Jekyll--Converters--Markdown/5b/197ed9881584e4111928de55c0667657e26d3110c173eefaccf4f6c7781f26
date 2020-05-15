@@ -1,0 +1,218 @@
+I"�b<p>在 Java 中，并不是所有的类型信息都能在编译阶段明确，有一些类型信息需要在运行时才能确定，这种机制被称为 RTTI，英文全称为 <code class="highlighter-rouge">Run-Time Type Identification</code>，即运行时类型识别，有没有一点“知行合一”的味道？运行时类型识别主要由Class类实现。</p>
+
+<!--more-->
+
+<p>在日常的学习工作当中，有一些知识是我们在读书的时候就能够习得；但有一些知识不是的，需要在实践的时候才能得到真知——这或许就是王阳明提倡的“知行合一”。</p>
+
+<h3 id="01-class类">01、 Class类</h3>
+
+<p>在Java中，我们常用“class”（首字母为小写的c）关键字来定义一个类，说这个类是对某一类对象的抽象。你比如说王二是一个网络知名作者，我们可以这样简单地定义作者类：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.cmower.java_demo.fifteen</span><span class="o">;</span>
+
+<span class="kd">class</span> <span class="nc">Author</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">pen_name</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">real_name</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>现在，我们想知道Writer这个类本身的一些信息（比如说类名），该怎么办呢？这时候就需要用到“Class”（首字母为大写的C）类，该类包含了与类有关的信息。请看以下代码：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span> <span class="o">(</span><span class="nc">String</span> <span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Author</span> <span class="n">wanger</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Author</span><span class="o">();</span>
+		<span class="nc">Class</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">wanger</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c1</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+		<span class="c1">//输出 com.cmower.java_demo.fifteen.Author</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>当我们创建了作者对象wanger后，就可以通过<code class="highlighter-rouge">wanger.getClass()</code>获取wanger的Class对象，通过<code class="highlighter-rouge">c1.getName()</code>可获得wanger对象的类名。</p>
+
+<p>想象一下，经过五年的刻意练习，王二从一名写作爱好者晋升为一名作家了。我们用代码来假装一下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.cmower.java_demo.fifteen</span><span class="o">;</span>
+
+<span class="kd">class</span> <span class="nc">Author</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">pen_name</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">real_name</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">Writer</span> <span class="kd">extends</span> <span class="nc">Author</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">honour</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span> <span class="o">(</span><span class="nc">String</span> <span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Author</span> <span class="n">wanger</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Writer</span><span class="o">();</span>
+		<span class="nc">Class</span> <span class="n">c1</span> <span class="o">=</span> <span class="n">wanger</span><span class="o">.</span><span class="na">getClass</span><span class="o">();</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c1</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+		<span class="c1">//输出 com.cmower.java_demo.fifteen.Writer</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>在上例中，即使我们将Writer的对象引用wanger向上转型为Author，wanger的Class对象类型依然是Writer（通过输出结果可以判定）。这也就是说，<strong>Java能够在运行时自动识别类型的信息</strong>，它不会因为wanger的引用类型是Author而丢失wanger真正的类型信息（Writer）。Java是怎么做到这一点呢？</p>
+
+<p>当Java创建某个类的对象，比如Writer类对象时，Java会检查内存中是否有相应的Class对象。如果内存中没有相应的Class对象，那么Java会在.class文件中寻找Writer类的定义，并加载Writer类的Class对象。</p>
+
+<p>一旦Class对象加载成功，就可以用它来创建这种类型的所有对象。这也就是说，每个对象在运行时都会有对应的Class对象，这个Class对象包含了这个对象的类型信息。因此，我们能够通过Class对象知道某个对象“真正”的类型，并不会因为向上转型而丢失。</p>
+
+<h3 id="02-获取class对象的其他方式">02、 获取Class对象的其他方式</h3>
+
+<p>在使用<code class="highlighter-rouge">getClass()</code>方法获取一个类的Class对象时，我们必须要先获取这个类的对象，比如上面提到的wanger。如果我们之前没有获取这个类的对象，就需要用另外两种方式来获取类的Class对象：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Class</span> <span class="n">c2</span> <span class="o">=</span> <span class="nc">Writer</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c2</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+
+<span class="k">try</span> <span class="o">{</span>
+	<span class="nc">Class</span> <span class="n">c3</span> <span class="o">=</span> <span class="nc">Class</span><span class="o">.</span><span class="na">forName</span><span class="o">(</span><span class="s">"com.cmower.java_demo.fifteen.Writer"</span><span class="o">);</span>
+	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c3</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">ClassNotFoundException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+	<span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）当使用<code class="highlighter-rouge">.class</code>来获取Class对象时，不会自动地初始化该Class对象，初始化被延迟到了对静态方法或者非final静态域进行首次引用时才执行。这样做不仅更简单，而且更安全，因为它在编译时就会受到检查（因此不需要置于try语句块中）。</p>
+
+<p>2）<code class="highlighter-rouge">Class.forName</code>会自动地初始化该Class对象，但需要指定类名，并且需要置于try语句块中。</p>
+
+<h3 id="03-class类提供的常用方法">03、 Class类提供的常用方法</h3>
+
+<p>Class类为我们提供了一些非常有用的方法，比如说<code class="highlighter-rouge">getName()</code>用来返回类名，<code class="highlighter-rouge">getPackage()</code>返回类所在的包名。</p>
+
+<p>我们还可以利用Class类提供的<code class="highlighter-rouge">newInstance()</code>方法来创建相应类的对象，比如:</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Class</span> <span class="n">c2</span> <span class="o">=</span> <span class="nc">Writer</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c2</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+
+<span class="k">try</span> <span class="o">{</span>
+	<span class="nc">Writer</span> <span class="n">wangsan</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Writer</span><span class="o">)</span> <span class="n">c2</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">wangsan</span><span class="o">);</span>
+	<span class="c1">// 输出：com.cmower.java_demo.fifteen.Writer@7852e922</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InstantiationException</span> <span class="o">|</span> <span class="nc">IllegalAccessException</span> <span class="n">e1</span><span class="o">)</span> <span class="o">{</span>
+	<span class="n">e1</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>由于我们在创建Class对象c2时没有使用泛型，所以<code class="highlighter-rouge">newInstance()</code>返回的对象类型需要强转为Writer。我们可以在此基础上进行改进，示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Class</span><span class="o">&lt;</span><span class="nc">Writer</span><span class="o">&gt;</span> <span class="n">c4</span> <span class="o">=</span> <span class="nc">Writer</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c4</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+
+<span class="k">try</span> <span class="o">{</span>
+	<span class="nc">Writer</span> <span class="n">wangsan</span> <span class="o">=</span> <span class="n">c4</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+	<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">wangsan</span><span class="o">);</span>
+	<span class="c1">// 输出：com.cmower.java_demo.fifteen.Writer@7852e922</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InstantiationException</span> <span class="o">|</span> <span class="nc">IllegalAccessException</span> <span class="n">e1</span><span class="o">)</span> <span class="o">{</span>
+	<span class="n">e1</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="04-反射">04、 反射</h3>
+
+<p>我们还可以通过<code class="highlighter-rouge">getFields()</code>获取所有public修饰的字段，通过<code class="highlighter-rouge">getMethods() </code>返回所有public修饰的方法。</p>
+
+<p>甚至，我们还可以通过<code class="highlighter-rouge">getDeclaredFields()</code>获取更多字段，包括公共、受保护、默认(包)访问和私有字段，但不包括继承字段。对应的，<code class="highlighter-rouge">getDeclaredMethods()</code>用来获取更多方法。示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.cmower.java_demo.fifteen</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Field</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.lang.reflect.Method</span><span class="o">;</span>
+
+<span class="kd">class</span> <span class="nc">Author</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">pen_name</span><span class="o">;</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">real_name</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">class</span> <span class="nc">Writer</span> <span class="kd">extends</span> <span class="nc">Author</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">honour</span><span class="o">;</span>
+
+	<span class="kd">private</span> <span class="kt">void</span> <span class="nf">makeMoney</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"很多很多钱"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+		<span class="nc">Class</span><span class="o">&lt;</span><span class="nc">Writer</span><span class="o">&gt;</span> <span class="n">c4</span> <span class="o">=</span> <span class="nc">Writer</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c4</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+
+		<span class="k">try</span> <span class="o">{</span>
+			<span class="nc">Writer</span> <span class="n">wangsan</span> <span class="o">=</span> <span class="n">c4</span><span class="o">.</span><span class="na">newInstance</span><span class="o">();</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">wangsan</span><span class="o">);</span>
+
+			<span class="nc">Field</span><span class="o">[]</span> <span class="n">fields</span> <span class="o">=</span> <span class="n">c4</span><span class="o">.</span><span class="na">getDeclaredFields</span><span class="o">();</span>
+			<span class="k">for</span> <span class="o">(</span><span class="nc">Field</span> <span class="n">field</span> <span class="o">:</span> <span class="n">fields</span><span class="o">)</span> <span class="o">{</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">field</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+			<span class="o">}</span>
+
+			<span class="nc">Method</span><span class="o">[]</span> <span class="n">methods</span> <span class="o">=</span> <span class="n">c4</span><span class="o">.</span><span class="na">getDeclaredMethods</span><span class="o">();</span>
+			<span class="k">for</span> <span class="o">(</span><span class="nc">Method</span> <span class="n">method</span> <span class="o">:</span> <span class="n">methods</span><span class="o">)</span> <span class="o">{</span>
+				<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">method</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+			<span class="o">}</span>
+		<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InstantiationException</span> <span class="o">|</span> <span class="nc">IllegalAccessException</span> <span class="n">e1</span><span class="o">)</span> <span class="o">{</span>
+			<span class="n">e1</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>上面的例子其实涉及到了反射，Field、Method（还有例子中未提到的Constructor）都来自java.lang.reflect类库。Class类与java.lang.reflect类库一起对反射的概念进行了支持。</p>
+
+<p>有时候，我们需要从磁盘文件或网络文件中读取一串字节码，并把它转换成一个类，这时候就需要用到反射。最常见的典型例子就是将一串JSON字符串（在网络传输中最初的形态可能是字节数组）反射为对应类型的对象。</p>
+
+<p>阿里巴巴提供的FastJSON提供了 <code class="highlighter-rouge">toJSONString()</code> 和 <code class="highlighter-rouge">parseObject()</code> 方法来将 Java 对象与 JSON 相互转换。调用toJSONString方法即可将对象转换成 JSON 字符串，parseObject 方法则反过来将 JSON 字符串转换成对象。FastJSON的内部其实用的就是反射机制。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.cmower.common.util</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.io.UnsupportedEncodingException</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">org.apache.commons.logging.Log</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.apache.commons.logging.LogFactory</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.alibaba.fastjson.JSON</span><span class="o">;</span>
+
+<span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"all"</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">JsonUtil</span> <span class="o">{</span>
+	<span class="kd">private</span> <span class="kd">static</span> <span class="nc">Log</span> <span class="n">logger</span> <span class="o">=</span> <span class="nc">LogFactory</span><span class="o">.</span><span class="na">getLog</span><span class="o">(</span><span class="s">"json"</span><span class="o">);</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">objectToByte</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnsupportedEncodingException</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">jsonStr</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="na">toJSONString</span><span class="o">(</span><span class="n">obj</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"序列化后数据："</span> <span class="o">+</span> <span class="n">jsonStr</span><span class="o">);</span>
+		<span class="k">return</span> <span class="n">jsonStr</span><span class="o">.</span><span class="na">getBytes</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="no">T</span> <span class="nf">byteToObject</span><span class="o">(</span><span class="kt">byte</span><span class="o">[]</span> <span class="n">data</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">obj</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnsupportedEncodingException</span> <span class="o">{</span>
+		<span class="nc">String</span> <span class="n">objectString</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="s">"UTF-8"</span><span class="o">);</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"反序列化后数据 : "</span> <span class="o">+</span> <span class="n">objectString</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">JSON</span><span class="o">.</span><span class="na">parseObject</span><span class="o">(</span><span class="n">objectString</span><span class="o">,</span> <span class="n">obj</span><span class="o">);</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">Object</span> <span class="nf">stringToObject</span><span class="o">(</span><span class="nc">String</span> <span class="n">data</span><span class="o">,</span> <span class="nc">Class</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">obj</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">UnsupportedEncodingException</span> <span class="o">{</span>
+		<span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"反序列化后数据 : "</span> <span class="o">+</span> <span class="n">data</span><span class="o">);</span>
+		<span class="k">return</span> <span class="no">JSON</span><span class="o">.</span><span class="na">parseObject</span><span class="o">(</span><span class="n">data</span><span class="o">,</span> <span class="n">obj</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="05-总结">05、 总结</h3>
+
+<p>为了完成这篇文章，我特意和<a href="https://mp.weixin.qq.com/s/14UMG0_EX1v_o0zo6xI14w">沉默王二交流群</a>的一名技术专家聊了聊，问他了几个很傻逼的问题：“‘运行时’是什么意思？是站在Java虚拟机的角度，还是程序员的角度？”</p>
+
+<p>他给了我很好的解释和启发，我不由觉得非常的惭愧，作为一名年纪颇长的Java学习者，竟然对理论知识薄弱到令人发指的地步——不知道你是否也有这样的困惑？</p>
+
+<p>但写作的好处就在于此，在向读者解释“Java如何在运行时识别类型信息”的过程中，我的思路逐渐地清晰了起来——这真是一个自我提升的好办法！</p>
+
+<hr />
+
+<p>上一篇：<a href="http://www.itwanger.com/java/2019/11/08/java-exception.html">Java异常处理：给程序罩一层保险</a></p>
+
+<p>下一篇：<a href="http://www.itwanger.com/java/2019/11/09/java-enum.html">Java枚举：小小enum，优雅而干净</a></p>
+
+<p>微信搜索「<strong>沉默王二</strong>」公众号，关注后回复「<strong>免费视频</strong>」获取 500G 高质量教学视频（<a href="https://mp.weixin.qq.com/s/GjkEyPW0vgIvuDLYQkBM0A">已分门别类</a>）。</p>
+
+:ET

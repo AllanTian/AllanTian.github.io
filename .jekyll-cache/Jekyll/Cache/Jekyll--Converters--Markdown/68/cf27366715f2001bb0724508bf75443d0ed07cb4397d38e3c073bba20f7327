@@ -1,0 +1,161 @@
+I"�D<p>大家好，我是沉默王二，周末在逛 programcreek 的时候，我发现了一些专注细节但价值连城的主题。比如说：Java 的 Comparable 和 Comparator 是兄弟俩吗？像这类灵魂拷问的主题，非常值得深入地研究一下。</p>
+
+<!--more-->
+
+<p><img src="http://www.itwanger.com/assets/images/2020/01/java-comparable-cmoparator-01.png" alt="" /></p>
+
+<p>Comparable 和 Comparator 是 Java 的两个接口，从名字上我们就能够读出来它们俩的相似性：以某种方式来比较两个对象。但它们之间到底有什么区别呢？请随我来，打怪进阶喽！</p>
+
+<h3 id="01comparable">01、Comparable</h3>
+
+<p>Comparable 接口的定义非常简单，源码如下所示。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Comparable</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="no">T</span> <span class="n">t</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>如果一个类实现了 Comparable 接口（只需要干一件事，重写 <code class="highlighter-rouge">compareTo()</code> 方法），就可以按照自己制定的规则将由它创建的对象进行比较。下面给出一个例子。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Cmower</span> <span class="kd">implements</span> <span class="nc">Comparable</span><span class="o">&lt;</span><span class="nc">Cmower</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">age</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Cmower</span><span class="o">(</span><span class="kt">int</span> <span class="n">age</span><span class="o">,</span> <span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">age</span> <span class="o">=</span> <span class="n">age</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="nc">Cmower</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">getAge</span><span class="o">()</span> <span class="o">-</span> <span class="n">o</span><span class="o">.</span><span class="na">getAge</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">Cmower</span> <span class="n">wanger</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Cmower</span><span class="o">(</span><span class="mi">19</span><span class="o">,</span><span class="s">"沉默王二"</span><span class="o">);</span>
+        <span class="nc">Cmower</span> <span class="n">wangsan</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Cmower</span><span class="o">(</span><span class="mi">16</span><span class="o">,</span><span class="s">"沉默王三"</span><span class="o">);</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">wanger</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">wangsan</span><span class="o">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">wanger</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">"比较年轻有为"</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">wangsan</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">"比较年轻有为"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>在上面的示例中，我创建了一个 Cmower 类，它有两个字段：age 和 name。Cmower 类实现了 Comparable 接口，并重写了 <code class="highlighter-rouge">compareTo()</code> 方法。</p>
+
+<p>程序输出的结果是“沉默王三比较年轻有为”，因为他比沉默王二小三岁。这个结果有什么凭证吗？</p>
+
+<p>凭证就在于 <code class="highlighter-rouge">compareTo()</code> 方法，该方法的返回值可能为负数，零或者正数，代表的意思是该对象按照排序的规则小于、等于或者大于要比较的对象。如果指定对象的类型与此对象不能进行比较，则引发 <code class="highlighter-rouge">ClassCastException</code> 异常（自从有了泛型，这种情况就少有发生了）。</p>
+
+<h3 id="02comparator">02、Comparator</h3>
+
+<p>Comparator 接口的定义相比较于 Comparable 就复杂的多了，不过，核心的方法只有两个，来看一下源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">interface</span> <span class="nc">Comparator</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="no">T</span> <span class="n">o1</span><span class="o">,</span> <span class="no">T</span> <span class="n">o2</span><span class="o">);</span>
+    <span class="kt">boolean</span> <span class="nf">equals</span><span class="o">(</span><span class="nc">Object</span> <span class="n">obj</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>第一个方法 <code class="highlighter-rouge">compare(T o1, T o2)</code> 的返回值可能为负数，零或者正数，代表的意思是第一个对象小于、等于或者大于第二个对象。</p>
+
+<p>第二个方法 <code class="highlighter-rouge">equals(Object obj)</code> 需要传入一个 Object 作为参数，并判断该 Object 是否和 Comparator 保持一致。</p>
+
+<p>有时候，我们想让类保持它的原貌，不想主动实现 Comparable 接口，但我们又需要它们之间进行比较，该怎么办呢？</p>
+
+<p>Comparator 就派上用场了，来看一下示例。</p>
+
+<p>1）原封不动的 Cmower 类。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Cmower</span>  <span class="o">{</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">age</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="nf">Cmower</span><span class="o">(</span><span class="kt">int</span> <span class="n">age</span><span class="o">,</span> <span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">age</span> <span class="o">=</span> <span class="n">age</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>（说好原封不动，getter/setter 吃了啊）</p>
+
+<p>Cmower 类有两个字段：age 和 name，意味着该类可以按照 age 或者 name 进行排序。</p>
+
+<p>2）再来看 Comparator 接口的实现类。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CmowerComparator</span> <span class="kd">implements</span> <span class="nc">Comparator</span><span class="o">&lt;</span><span class="nc">Cmower</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="nc">Cmower</span> <span class="n">o1</span><span class="o">,</span> <span class="nc">Cmower</span> <span class="n">o2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">o1</span><span class="o">.</span><span class="na">getAge</span><span class="o">()</span> <span class="o">-</span> <span class="n">o2</span><span class="o">.</span><span class="na">getAge</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>按照 age 进行比较。当然也可以再实现一个比较器，按照 name 进行自然排序，示例如下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">CmowerNameComparator</span> <span class="kd">implements</span> <span class="nc">Comparator</span><span class="o">&lt;</span><span class="nc">Cmower</span><span class="o">&gt;</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">compare</span><span class="o">(</span><span class="nc">Cmower</span> <span class="n">o1</span><span class="o">,</span> <span class="nc">Cmower</span> <span class="n">o2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">o1</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">hashCode</span><span class="o">()</span> <span class="o">&lt;</span> <span class="n">o2</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">hashCode</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+        <span class="o">}</span> <span class="k">else</span> <span class="k">if</span> <span class="o">(</span><span class="n">o1</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">hashCode</span><span class="o">()</span> <span class="o">==</span> <span class="n">o2</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">hashCode</span><span class="o">())</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="o">;</span>
+        <span class="o">}</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>3）再来看测试类。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Cmower</span> <span class="n">wanger</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Cmower</span><span class="o">(</span><span class="mi">19</span><span class="o">,</span><span class="s">"沉默王二"</span><span class="o">);</span>
+<span class="nc">Cmower</span> <span class="n">wangsan</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Cmower</span><span class="o">(</span><span class="mi">16</span><span class="o">,</span><span class="s">"沉默王三"</span><span class="o">);</span>
+<span class="nc">Cmower</span> <span class="n">wangyi</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Cmower</span><span class="o">(</span><span class="mi">28</span><span class="o">,</span><span class="s">"沉默王一"</span><span class="o">);</span>
+
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Cmower</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+<span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">wanger</span><span class="o">);</span>
+<span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">wangsan</span><span class="o">);</span>
+<span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">wangyi</span><span class="o">);</span>
+
+<span class="n">list</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="k">new</span> <span class="nc">CmowerComparator</span><span class="o">());</span>
+
+<span class="k">for</span> <span class="o">(</span><span class="nc">Cmower</span> <span class="n">c</span> <span class="o">:</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>创建了三个对象，age 不同，name 不同，并把它们加入到了 List 当中。然后使用 List 的 <code class="highlighter-rouge">sort()</code> 方法进行排序，来看一下输出的结果。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>沉默王三
+沉默王二
+沉默王一
+</code></pre></div></div>
+
+<p>这意味着沉默王三的年纪比沉默王二小，排在第一位；沉默王一的年纪比沉默王二大，排在第三位。和我们的预期完全符合。</p>
+
+<h3 id="03到底该用哪一个呢">03、到底该用哪一个呢？</h3>
+
+<p>通过上面的两个例子可以比较出 Comparable 和 Comparator 两者之间的区别：</p>
+
+<ul>
+  <li>一个类实现了 Comparable 接口，意味着该类的对象可以直接进行比较（排序），但比较（排序）的方式只有一种，很单一。</li>
+  <li>一个类如果想要保持原样，又需要进行不同方式的比较（排序），就可以定制比较器（实现 Comparator 接口）。</li>
+  <li>Comparable 接口在 <code class="highlighter-rouge">java.lang</code> 包下，而 <code class="highlighter-rouge">Comparator</code> 接口在 <code class="highlighter-rouge">java.util</code> 包下，算不上是亲兄弟，但可以称得上是表（堂）兄弟。</li>
+</ul>
+
+<p>举个不恰当的例子。我想从洛阳出发去北京看长城，体验一下好汉的感觉，要么坐飞机，要么坐高铁；但如果是孙悟空的话，翻个筋斗就到了。我和孙悟空之间有什么区别呢？孙悟空自己实现了 Comparable 接口（他那年代也没有飞机和高铁，没得选），而我可以借助 Comparator 接口（现代化的交通工具）。</p>
+
+<p>总而言之，如果对象的排序需要基于自然顺序，请选择 <code class="highlighter-rouge">Comparable</code>，如果需要按照对象的不同属性进行排序，请选择 <code class="highlighter-rouge">Comparator</code>。</p>
+
+<h3 id="04鸣谢">04、鸣谢</h3>
+
+<p>好了，各位读者朋友们，以上就是本文的全部内容了。<strong>能看到这里的都是最胖的程序员（不，最棒），升职加薪就是你了</strong>👍。如果觉得不过瘾，还想看到更多，可以 star 小鸭的 GitHub【<a href="https://github.com/qinggee/itwanger.github.io">itwanger.github.io</a>】，本文已收录。</p>
+
+<p>原创不易，如果觉得有点用的话，请不要吝啬你手中<strong>点赞</strong>的权力——这将是我最强的写作动力。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/cmower_6.png" alt="" /></p>
+:ET

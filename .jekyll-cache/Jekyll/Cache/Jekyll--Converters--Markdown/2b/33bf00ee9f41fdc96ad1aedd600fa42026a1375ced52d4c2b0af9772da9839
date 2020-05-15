@@ -1,0 +1,63 @@
+I"�<p>有时候，我们需要查看 IDEA 编译后的 class 文件是什么样子的，字节码不太能看得懂，就需要再进行反编译。怎么做呢？</p>
+
+<!--more-->
+
+<p>项目的目录下有一个 target，根据报名找到对应的 class 文件双击打开即可。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/12/idea-view-class-1.png" alt="" /></p>
+
+<p>IDEA 默认会使用 Fernflower 对字节码文件进行反编译。反编译后的内容如下所示。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//</span>
+<span class="c1">// Source code recreated from a .class file by IntelliJ IDEA</span>
+<span class="c1">// (powered by Fernflower decompiler)</span>
+<span class="c1">//</span>
+
+<span class="kn">package</span> <span class="nn">com.cmower.java_demo.stackoverflow</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Cmower1</span> <span class="o">{</span>
+    <span class="kd">public</span> <span class="nf">Cmower1</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">String</span><span class="o">[]</span> <span class="n">names</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">[]{</span><span class="s">"沉"</span><span class="o">,</span> <span class="s">"默"</span><span class="o">,</span> <span class="s">"王"</span><span class="o">,</span> <span class="s">"二"</span><span class="o">};</span>
+        <span class="nc">String</span><span class="o">[]</span> <span class="n">var2</span> <span class="o">=</span> <span class="n">names</span><span class="o">;</span>
+        <span class="kt">int</span> <span class="n">var3</span> <span class="o">=</span> <span class="n">names</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+
+        <span class="k">for</span><span class="o">(</span><span class="kt">int</span> <span class="n">var4</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">var4</span> <span class="o">&lt;</span> <span class="n">var3</span><span class="o">;</span> <span class="o">++</span><span class="n">var4</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">String</span> <span class="n">name</span> <span class="o">=</span> <span class="n">var2</span><span class="o">[</span><span class="n">var4</span><span class="o">];</span>
+            <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+        <span class="o">}</span>
+
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>源文件长什么样子呢？</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">package</span> <span class="nn">com.cmower.java_demo.stackoverflow</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Cmower1</span> <span class="o">{</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+<span class="nc">String</span><span class="o">[]</span> <span class="n">names</span> <span class="o">=</span> <span class="o">{</span> <span class="s">"沉"</span><span class="o">,</span> <span class="s">"默"</span><span class="o">,</span> <span class="s">"王"</span><span class="o">,</span> <span class="s">"二"</span> <span class="o">};</span>
+
+    <span class="k">for</span> <span class="o">(</span><span class="nc">String</span> <span class="n">name</span> <span class="o">:</span> <span class="n">names</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>可以看得出，javac 会帮助我们对源文件进行一些编译优化。比如说：</p>
+
+<p>1）{}声明的数组最终还是用的 new 关键字。
+2）增强的 for 循环最终还是变成了普通的 for 循环语句。</p>
+
+<p>系列文章：</p>
+
+<p><a href="http://www.itwanger.com/java/2019/11/25/java-idea-community.html">如何安装 IntelliJ IDEA 最新版本——详细教程</a></p>
+
+<p><a href="http://www.itwanger.com/java/2019/11/26/java-idea-import-auto.html">IDEA 如何自动导入（import）</a></p>
+
+:ET

@@ -1,0 +1,47 @@
+I"�<p>对于小不点的项目来说，RateLimiter配合ConcurrentHashMap可以对用户进行简单的限流，防止用户频繁刷量或者高频请求。</p>
+
+<!--more-->
+
+<p>RateLimiter 是 Guava 下的一个包，采用的是令牌桶算法：以一个恒定的速率向固定容量大小的桶中放入令牌，当有流量来的时候从桶中取出一个令牌。如果桶中没有可用的令牌时就丢弃请求或者阻塞。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/12/java-ratelimiter-concurrent-hashmap-1.png" alt="" /></p>
+
+<p>ConcurrentHashMap 是一个可以在并发环境下使用的 HashMap，通俗点说就是线程安全的。</p>
+
+<p>大致的思路也很简单：当一个请求过来时，根据用户的 ID 从 ConcurrentHashMap 取出 RateLimiter，然后尝试取出令牌，如果获取失败，则提示用户请求过于频繁；否则进行业务处理。</p>
+
+<p>首先在 Controller 类中创建一个 ConcurrentHashMap 对象。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kd">final</span> <span class="kd">static</span> <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">,</span> <span class="nc">RateLimiter</span><span class="o">&gt;</span> <span class="n">outMoneyLimitMap</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ConcurrentHashMap</span><span class="o">&lt;&gt;();</span>
+</code></pre></div></div>
+
+<p>然后是请求的处理代码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">ModelAndView</span> <span class="nf">submitOut</span><span class="o">()</span> <span class="o">{</span>
+	<span class="nc">RateLimiter</span> <span class="n">rateLimiter</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">outMoneyLimitMap</span><span class="o">.</span><span class="na">containsKey</span><span class="o">(</span><span class="n">uid</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"包含有该uid"</span><span class="o">);</span>
+    
+        <span class="n">rateLimiter</span> <span class="o">=</span> <span class="n">outMoneyLimitMap</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">uid</span><span class="o">);</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="n">logger</span><span class="o">.</span><span class="na">debug</span><span class="o">(</span><span class="s">"没有该uid"</span><span class="o">);</span>
+        <span class="c1">// 需要新增，一秒内 0.1 个令牌（10秒内一个令牌）</span>
+        <span class="n">rateLimiter</span> <span class="o">=</span> <span class="nc">RateLimiter</span><span class="o">.</span><span class="na">create</span><span class="o">(</span><span class="mf">0.1</span><span class="o">);</span>
+    
+        <span class="n">outMoneyLimitMap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">uid</span><span class="o">,</span> <span class="n">rateLimiter</span><span class="o">);</span>
+    <span class="o">}</span>
+    
+     <span class="k">if</span><span class="o">(!</span><span class="n">rateLimiter</span><span class="o">.</span><span class="na">tryAcquire</span><span class="o">())</span> <span class="o">{</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">OrderException</span><span class="o">(</span><span class="s">"请求过于频繁"</span><span class="o">);</span>
+    <span class="o">}</span>
+	<span class="c1">// 正常业务处理</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">RateLimiter.create()</code> 可以创建一个限流器，参数可以是 double，例子中为 0.1，即 10 秒内一个令牌（便于模拟）。</p>
+
+<p>然后通过 <code class="highlighter-rouge">rateLimiter.tryAcquire()</code> 尝试获取令牌，如果获取失败，就提示用户。否则正常业务处理。</p>
+
+<p>整体思路非常非常简单，实现起来也非常容易，是一种非常好用的限流示例。</p>
+
+:ET

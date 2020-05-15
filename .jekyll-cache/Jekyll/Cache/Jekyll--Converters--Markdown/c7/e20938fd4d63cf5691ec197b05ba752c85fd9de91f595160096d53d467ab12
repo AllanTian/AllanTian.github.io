@@ -1,0 +1,258 @@
+I"�V<p>在 Java 中，并不是所有的类型信息都能在编译阶段明确，有一些类型信息需要在运行时才能确定，这种机制被称为 RTTI，英文全称为 <code class="highlighter-rouge">Run-Time Type Identification</code>，即运行时类型识别，有没有一点“知行合一”的味道？运行时类型识别主要由Class类实现。</p>
+
+<!--more-->
+
+<blockquote>
+  <p>Java注解是一系列元数据，它提供数据用来解释程序代码，但是注解并非是所解释的代码本身的一部分。注解对于代码的运行效果没有直接影响。</p>
+</blockquote>
+
+<p>网络上对注解的解释过于严肃、刻板，这并不是<a href="https://mp.weixin.qq.com/s/feoOINGSyivBO8Z1gaQVOA">我</a>喜欢的风格。尽管这样的解释听起来非常的专业。</p>
+
+<p>为了缓解大家对“注解”的陌生感，我来说点有意思的。其实我对“注解”这个词的第一印象并不是Java的注解，而是朱熹的名作《四书章句集注》。为什么我会有这么大的脑洞呢？因为当我试着去翻译<code class="highlighter-rouge">Annotation</code>这个单词的时候，得到的结果是“注释”而不是“注解”。《四书章句集注》正是朱熹对《大学》、《中庸》、《论语》、《孟子》四书做出的重要的注释。要知道，该书可是明清以后科举考试的题库和标准答案！</p>
+
+<p>注解（<code class="highlighter-rouge">Annotation</code>）是在 Java SE 5.0 版本中开始引入的概念，同<code class="highlighter-rouge">class</code>和<code class="highlighter-rouge">interface</code>一样，也属于一种类型。很多开发人员认为注解的地位不高，但其实不是这样的。像<code class="highlighter-rouge">@Transactional</code>、<code class="highlighter-rouge">@Service</code>、<code class="highlighter-rouge">@RestController</code>、<code class="highlighter-rouge">@RequestMapping</code>、<code class="highlighter-rouge">@CrossOrigin</code>等等这些注解的使用频率越来越高。</p>
+
+<h3 id="01为什么要使用注解呢">01、为什么要使用注解呢？</h3>
+
+<p>为什么要使用注解呢？让我们从另外一个问题说起。</p>
+
+<p>“跨域”这两个字就像一块狗皮膏药黏在每一个前端开发者的身上；我也不例外，虽然我并不是一个纯粹的前端开发者。</p>
+
+<p>跨域问题的出现，源于浏览器的同源策略——限制一个源加载的脚本去访问另外一个源的资源，可有效地隔离潜在的恶意文件，是一种重要的安全机制。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-annotation-1.png" alt="" /></p>
+
+<p>跨域问题的解决方案也有很多，比如说：</p>
+
+<p>1）JSONP</p>
+
+<p>2）Nginx代理</p>
+
+<p>3）”跨域资源共享”（Cross-origin resource sharing），简称<code class="highlighter-rouge">CORS</code>，可以说是处理跨域问题的标准做法。</p>
+
+<p>记得第一次遇到跨域问题的时候，我特意向一个同学请教了解决方案，他告诉我的答案如下。</p>
+
+<p>第一步，在web.xml添加filter。</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;filter&gt;</span>
+  <span class="nt">&lt;filter-name&gt;</span>contextfilter<span class="nt">&lt;/filter-name&gt;</span>
+  <span class="nt">&lt;filter-class&gt;</span>com.cmower.filter.WebContextFilter<span class="nt">&lt;/filter-class&gt;</span>
+<span class="nt">&lt;/filter&gt;</span>
+<span class="nt">&lt;filter-mapping&gt;</span>
+  <span class="nt">&lt;filter-name&gt;</span>contextfilter<span class="nt">&lt;/filter-name&gt;</span>
+  <span class="nt">&lt;url-pattern&gt;</span>/*<span class="nt">&lt;/url-pattern&gt;</span>
+<span class="nt">&lt;/filter-mapping&gt;</span>
+</code></pre></div></div>
+
+<p>第二步，实现WebContextFilter类。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebContextFilter</span> <span class="kd">implements</span> <span class="nc">Filter</span> <span class="o">{</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">destroy</span><span class="o">()</span> <span class="o">{</span>
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">doFilter</span><span class="o">(</span><span class="nc">ServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">ServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">FilterChain</span> <span class="n">chain</span><span class="o">)</span>
+            <span class="kd">throws</span> <span class="nc">IOException</span><span class="o">,</span> <span class="nc">ServletException</span> <span class="o">{</span>
+        <span class="nc">HttpServletResponse</span>  <span class="n">httpServletResponse</span> <span class="o">=</span> <span class="o">(</span><span class="nc">HttpServletResponse</span><span class="o">)</span> <span class="n">response</span><span class="o">;</span>
+        <span class="n">httpServletResponse</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"Access-Control-Allow-Origin"</span><span class="o">,</span> <span class="s">"*"</span><span class="o">);</span>
+        <span class="n">httpServletResponse</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"Access-Control-Allow-Headers"</span><span class="o">,</span> <span class="s">"accept,content-type"</span><span class="o">);</span> 
+        <span class="n">httpServletResponse</span><span class="o">.</span><span class="na">setHeader</span><span class="o">(</span><span class="s">"Access-Control-Allow-Methods"</span><span class="o">,</span> <span class="s">"OPTIONS,GET,POST,DELETE,PUT"</span><span class="o">);</span> 
+        <span class="n">chain</span><span class="o">.</span><span class="na">doFilter</span><span class="o">(</span><span class="n">request</span><span class="o">,</span> <span class="n">httpServletResponse</span><span class="o">);</span>
+         
+    <span class="o">}</span>
+ 
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">init</span><span class="o">(</span><span class="nc">FilterConfig</span> <span class="n">arg0</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">ServletException</span> <span class="o">{</span>
+    <span class="o">}</span>
+ 
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>看到这样的解决方案，我真的是蛮崩溃的。不就一个跨域问题嘛，用得着这么多代码吗？</p>
+
+<p>我对这样的解决方案非常的不满意。于是下定决心要好好的研究一番，大概花了半天的时间吧，我终于搞清楚了“跨域”问题，以及它的标准解决方案<code class="highlighter-rouge">CORS</code>。并且找到了一个极为简洁的解决方案——<code class="highlighter-rouge">@CrossOrigin</code>，只要在Controller类上加上这个注解，就可以轻松地解决跨域问题。</p>
+
+<p>代码如下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"course"</span><span class="o">)</span>
+<span class="nd">@CrossOrigin</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CourseController</span> <span class="o">{</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>如果没有找到<code class="highlighter-rouge">@CrossOrigin</code>这个注解，我真的就要按照同学提供的方案去解决跨域的问题了。但那样做就好像，我们卖掉家里的小汽车，然后出行的时候驾一辆马车一样。</p>
+
+<p>这也正是我想告诉你的，为什么要使用注解的原因：它让我们的代码看起来更简洁，更有时代的进步感。</p>
+
+<h3 id="02该如何定义注解呢">02、该如何定义注解呢？</h3>
+
+<p>注解需要通过<code class="highlighter-rouge">@interface</code>关键字（形式和接口非常的相似，只是前面多了一个<code class="highlighter-rouge">@</code>）进行定义。我们可以打开<code class="highlighter-rouge">@CrossOrigin</code>的源码来看一下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Target</span><span class="o">({</span> <span class="nc">ElementType</span><span class="o">.</span><span class="na">METHOD</span><span class="o">,</span> <span class="nc">ElementType</span><span class="o">.</span><span class="na">TYPE</span> <span class="o">})</span>
+<span class="nd">@Retention</span><span class="o">(</span><span class="nc">RetentionPolicy</span><span class="o">.</span><span class="na">RUNTIME</span><span class="o">)</span>
+<span class="nd">@Documented</span>
+<span class="kd">public</span> <span class="nd">@interface</span> <span class="nc">CrossOrigin</span> <span class="o">{</span>
+	<span class="cm">/**
+	 * List of allowed origins, e.g. {@code "http://domain1.com"}.
+	 * &lt;p&gt;These values are placed in the {@code Access-Control-Allow-Origin}
+	 * header of both the pre-flight response and the actual response.
+	 * {@code "*"} means that all origins are allowed.
+	 * &lt;p&gt;If undefined, all origins are allowed.
+	 * @see #value
+	 */</span>
+	<span class="nd">@AliasFor</span><span class="o">(</span><span class="s">"value"</span><span class="o">)</span>
+	<span class="nc">String</span><span class="o">[]</span> <span class="nf">origins</span><span class="o">()</span> <span class="k">default</span> <span class="o">{};</span>
+	<span class="cm">/**
+	 * List of request headers that can be used during the actual request.
+	 * &lt;p&gt;This property controls the value of the pre-flight response's
+	 * {@code Access-Control-Allow-Headers} header.
+	 * {@code "*"}  means that all headers requested by the client are allowed.
+	 * &lt;p&gt;If undefined, all requested headers are allowed.
+	 */</span>
+	<span class="nc">String</span><span class="o">[]</span> <span class="nf">allowedHeaders</span><span class="o">()</span> <span class="k">default</span> <span class="o">{};</span>
+	<span class="cm">/**
+	 * List of supported HTTP request methods, e.g.
+	 * {@code "{RequestMethod.GET, RequestMethod.POST}"}.
+	 * &lt;p&gt;Methods specified here override those specified via {@code RequestMapping}.
+	 * &lt;p&gt;If undefined, methods defined by {@link RequestMapping} annotation
+	 * are used.
+	 */</span>
+	<span class="nc">RequestMethod</span><span class="o">[]</span> <span class="nf">methods</span><span class="o">()</span> <span class="k">default</span> <span class="o">{};</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>从上面的代码可以看得出来，“注解”真的很“注解”，除了注释多和“元注解”多之外，真没有别的了。</p>
+
+<p>“元注解”？什么是“元注解”呢？</p>
+
+<p>“元注解”是用来注解（动词）注解（名词）的注解（名词）。请感受汉语的博大精深。<code class="highlighter-rouge">@Target</code>、<code class="highlighter-rouge">@Retention</code>和<code class="highlighter-rouge">@Documented</code>就是所谓的元注解。</p>
+
+<p>1）@Target</p>
+
+<p>Target是目标的意思，<code class="highlighter-rouge">@Target</code>指定了注解运用的场景。都有哪些场景值呢？</p>
+
+<ul>
+  <li><code class="highlighter-rouge">ElementType.ANNOTATION_TYPE</code>：可以给注解进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.CONSTRUCTOR</code>：可以给构造方法进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.FIELD</code>：可以给字段进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.LOCAL_VARIABLE</code>：可以给局部变量进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.METHOD</code>：可以给方法进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.PACKAGE</code>：可以给包进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.PARAMETER</code>：可以给方法内的参数进行注解</li>
+  <li><code class="highlighter-rouge">ElementType.TYPE</code>：可以给类型进行注解，比如类、接口和枚举</li>
+</ul>
+
+<p>2）@Retention</p>
+
+<p>Retention这个单词的意思为保留期。也就是说，当<code class="highlighter-rouge">@Retention</code>应用到一个注解上的时候，它解释说明了这个注解的存活时间。来看它的取值范围。</p>
+
+<ul>
+  <li><code class="highlighter-rouge">RetentionPolicy.SOURCE</code>：注解只在源码阶段保留，在编译器进行编译时它将被丢弃忽视。</li>
+  <li><code class="highlighter-rouge">RetentionPolicy.CLASS</code>：注解只被保留到编译进行的时候，并不会被加载到 JVM 中。</li>
+  <li><code class="highlighter-rouge">RetentionPolicy.RUNTIME</code>：注解可以保留到程序运行的时候，它会被加载进入到 JVM 中，所以在程序运行时可以获取到它们。</li>
+</ul>
+
+<p>3）@Documented</p>
+
+<p><code class="highlighter-rouge">Documented</code>就比较容易理解，它和文档有关。作用就是能够将注解中的元素包含到 Javadoc 中。</p>
+
+<p>当我们了解了元注解的概念后，再回头看一下<code class="highlighter-rouge">@CrossOrigin</code>的源码，是不是感觉清晰多了呢？</p>
+
+<p>如果能够细致地读一读源码中的注释，你就会看到WebContextFilter类中出现的关键字，诸如<code class="highlighter-rouge">Access-Control-Allow-Origin</code>、<code class="highlighter-rouge">Access-Control-Allow-Headers</code>、<code class="highlighter-rouge">Access-Control-Allow-Methods</code>。也就是说，当我们通过<code class="highlighter-rouge">@CrossOrigin</code>对Controller类注解后，SpringMVC就能够在运行时对这个类自动加上解决跨域问题的过滤器。</p>
+
+<h3 id="03注解可以反射吗">03、注解可以反射吗？</h3>
+
+<p>注解是可以通过<a href="http://www.itwanger.com/java/2019/11/08/java-fanshe.html">反射</a>获取的。</p>
+
+<p>1）可以通过 Class 对象的 <code class="highlighter-rouge">isAnnotationPresent()</code> 方法判断该类是否应用了某个指定的注解。</p>
+
+<p>2）通过 <code class="highlighter-rouge">getAnnotation()</code> 方法来获取注解对象。</p>
+
+<p>3）当获取到注解对象后，就可以获取使用注解时定义的属性值。</p>
+
+<p>示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@CrossOrigin</span><span class="o">(</span><span class="n">origins</span> <span class="o">=</span> <span class="s">"http://qingmiaokeji.com"</span><span class="o">,</span> <span class="n">allowedHeaders</span> <span class="o">=</span> <span class="s">"accept,content-type"</span><span class="o">,</span> <span class="n">methods</span> <span class="o">=</span> <span class="o">{</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">GET</span><span class="o">,</span> <span class="nc">RequestMethod</span><span class="o">.</span><span class="na">POST</span> <span class="o">})</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestController</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">Class</span> <span class="n">c</span> <span class="o">=</span> <span class="nc">TestController</span><span class="o">.</span><span class="na">class</span><span class="o">;</span>
+
+		<span class="k">if</span> <span class="o">(</span><span class="n">c</span><span class="o">.</span><span class="na">isAnnotationPresent</span><span class="o">(</span><span class="nc">CrossOrigin</span><span class="o">.</span><span class="na">class</span><span class="o">))</span> <span class="o">{</span>
+			<span class="nc">CrossOrigin</span> <span class="n">crossOrigin</span> <span class="o">=</span> <span class="o">(</span><span class="nc">CrossOrigin</span><span class="o">)</span> <span class="n">c</span><span class="o">.</span><span class="na">getAnnotation</span><span class="o">(</span><span class="nc">CrossOrigin</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">crossOrigin</span><span class="o">.</span><span class="na">allowedHeaders</span><span class="o">()));</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">crossOrigin</span><span class="o">.</span><span class="na">methods</span><span class="o">()));</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">crossOrigin</span><span class="o">.</span><span class="na">origins</span><span class="o">()));</span>
+		<span class="o">}</span>
+
+	<span class="o">}</span>
+<span class="o">}</span>
+
+<span class="c1">// 输出：[accept,content-type]</span>
+<span class="c1">// [GET, POST]</span>
+<span class="c1">// [http://qingmiaokeji.com]</span>
+</code></pre></div></div>
+
+<h3 id="04注解经常用在哪里呢">04、注解经常用在哪里呢？</h3>
+
+<p>1）<code class="highlighter-rouge">@Transactional</code>：Spring 为事务管理提供的功能支持。</p>
+
+<p>2）<code class="highlighter-rouge">@ Service</code>：Spring在进行包扫描的时候，会自动将这个类注册到Spring容器中。</p>
+
+<p>3）<code class="highlighter-rouge">@RestController</code>：是<code class="highlighter-rouge">@ResponseBody</code>和<code class="highlighter-rouge">@Controller</code>的组合注解。</p>
+
+<p>也就是说，下面这段代码与下下面的代码等同。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloController</span> <span class="o">{</span>
+
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"hello"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">sayHello</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="s">"hello"</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Controller</span>
+<span class="nd">@ResponseBody</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">HelloController</span> <span class="o">{</span>
+
+    <span class="nd">@RequestMapping</span><span class="o">(</span><span class="n">value</span><span class="o">=</span><span class="s">"hello"</span><span class="o">)</span>
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">sayHello</span><span class="o">(){</span>
+        <span class="k">return</span> <span class="s">"hello"</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>4）<code class="highlighter-rouge">@RequestMapping</code> ：Spring Web 应用程序中最常用到的注解之一，将 HTTP 请求映射到 MVC 和 REST 控制器的处理方法上。</p>
+
+<p>5）<code class="highlighter-rouge">@Select</code>：MyBatis提供的查询语句注解。示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Select</span><span class="o">(</span><span class="s">"select * from city"</span><span class="o">)</span>
+<span class="nc">List</span><span class="o">&lt;</span><span class="nc">City</span><span class="o">&gt;</span> <span class="nf">getCitys</span><span class="o">();</span>
+</code></pre></div></div>
+
+<p>6）还有很多很多，就不再一一列举了。</p>
+
+<h3 id="05最后">05）最后</h3>
+
+<p>我想说的是，注解有许多用处，主要有：</p>
+
+<ul>
+  <li>提供信息给编译器： 编译器可以利用注解来探测错误和警告信息。</li>
+  <li>编译阶段时的处理：  软件工具可以利用注解信息来生成代码、HTML文档。</li>
+  <li>运行时的处理：  某些注解可以在程序运行的时候接受代码的提取。</li>
+</ul>
+
+<hr />
+
+<p>上一篇：<a href="http://www.itwanger.com/java/2019/11/09/java-enum.html">Java枚举：小小enum，优雅而干净</a></p>
+
+<p>下一篇：<a href="http://www.itwanger.com/java/2019/11/09/java-io.html">Java I/O 入门篇</a></p>
+
+<p>微信搜索「<strong>沉默王二</strong>」公众号，关注后回复「<strong>免费视频</strong>」获取 500G 高质量教学视频（<a href="https://mp.weixin.qq.com/s/GjkEyPW0vgIvuDLYQkBM0A">已分门别类</a>）。</p>
+
+:ET

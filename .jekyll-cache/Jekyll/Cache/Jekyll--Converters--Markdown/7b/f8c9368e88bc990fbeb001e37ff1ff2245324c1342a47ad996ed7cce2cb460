@@ -1,0 +1,2 @@
+I"j<p>在 Maven 出现之前，流行的构建工具是 Ant；在 Maven 出现之后，还有一种新兴的构建工具 Gradle，它有意选择了和 Maven 相反的原则，不会强制使用者遵循刻板的构建周期。这是我之前写 <a href="http://www.itwanger.com/java/2019/10/24/maven-rumen.html">Maven 入门</a> 的时候里面的一句话。</p>
+:ET

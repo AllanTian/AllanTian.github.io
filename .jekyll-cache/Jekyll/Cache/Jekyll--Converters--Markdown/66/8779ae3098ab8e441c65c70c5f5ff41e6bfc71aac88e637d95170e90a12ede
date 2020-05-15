@@ -1,0 +1,2 @@
+I"<p>Predicate 是 Java 8 新增的一个函数式接口（通过 <code class="highlighter-rouge">@FunctionalInterface</code> 注解定义），因此可以将一个 <a href="http://www.itwanger.com/java/2020/02/09/java-Lambda.html">Lambda 表达式</a>赋值于它。</p>
+:ET

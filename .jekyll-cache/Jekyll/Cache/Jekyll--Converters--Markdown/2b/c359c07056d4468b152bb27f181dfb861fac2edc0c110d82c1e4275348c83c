@@ -1,0 +1,2 @@
+I"s<p>在 Java 中，并不是所有的类型信息都能在编译阶段明确，有一些类型信息需要在运行时才能确定，这种机制被称为 RTTI，英文全称为 <code class="highlighter-rouge">Run-Time Type Identification</code>，即运行时类型识别，有没有一点“知行合一”的味道？运行时类型识别主要由Class类实现。</p>
+:ET

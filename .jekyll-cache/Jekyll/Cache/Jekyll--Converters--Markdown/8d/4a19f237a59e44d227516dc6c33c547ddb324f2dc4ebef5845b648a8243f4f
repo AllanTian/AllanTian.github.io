@@ -1,0 +1,285 @@
+I"Ow<p>二哥，我今年大二，看你分享的《阿里巴巴 Java 开发手册》上有一段内容说：“循环体内，拼接字符串最好使用 StringBuilder 的 append 方法，而不是 + 号操作符。”到底为什么啊，我平常一直就用的‘+’号操作符啊！二哥有空的时候能否写一篇文章分析一下呢？</p>
+
+<!--more-->
+
+<p>就在昨天，一位叫小菜的读者微信我说了上面这段话。</p>
+
+<p>我当时看到这条微信的第一感觉是：小菜你也太菜了吧，这都不知道为啥啊！我估计正在读这篇文章的你也会有同样的感觉。</p>
+
+<p>但扪心自问，在<a href="https://mp.weixin.qq.com/s/feoOINGSyivBO8Z1gaQVOA">我</a>做程序员的前两年内，我也不知道为啥。遇到<a href="http://www.itwanger.com/java/2019/11/08/java-string.html">字符串</a>拼接就上“+”号操作符，甭管是不是在循环体内。和小菜比起来，我当时可没他这么幸运，还有一位热心的“二哥”能够分享这份价值连城的开发手册。</p>
+
+<p>既然我这么热心分享，不如好人做到底，对不对？我就认认真真地写一篇文章，给小菜解惑一下。</p>
+
+<h3 id="01号操作符">01、“+”号操作符</h3>
+
+<p>要说姿势，“+”号操作符必须是字符串拼接最常用的一种了，没有之一。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">chenmo</span> <span class="o">=</span> <span class="s">"沉默"</span><span class="o">;</span>
+<span class="nc">String</span> <span class="n">wanger</span> <span class="o">=</span> <span class="s">"王二"</span><span class="o">;</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">chenmo</span> <span class="o">+</span> <span class="n">wanger</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>我们把这段代码使用 JAD 反编译一下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">chenmo</span> <span class="o">=</span> <span class="s">"\u6C89\u9ED8"</span><span class="o">;</span> <span class="c1">// 沉默</span>
+<span class="nc">String</span> <span class="n">wanger</span> <span class="o">=</span> <span class="s">"\u738B\u4E8C"</span><span class="o">;</span> <span class="c1">// 王二</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">((</span><span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">(</span><span class="nc">String</span><span class="o">.</span><span class="na">valueOf</span><span class="o">(</span><span class="n">chenmo</span><span class="o">))).</span><span class="na">append</span><span class="o">(</span><span class="n">wanger</span><span class="o">).</span><span class="na">toString</span><span class="o">());</span>
+</code></pre></div></div>
+
+<p>我去，原来编译的时候把“+”号操作符替换成了 StringBuilder 的 append 方法。也就是说，“+”号操作符在拼接字符串的时候只是一种形式主义，让开发者使用起来比较简便，代码看起来比较简洁，读起来比较顺畅。算是 Java 的一种语法糖吧。</p>
+
+<h3 id="02stringbuilder">02、StringBuilder</h3>
+
+<p>除去“+”号操作符，StringBuilder 的 append 方法就是第二个常用的字符串拼接姿势了。</p>
+
+<p>先来看一下 StringBuilder 类的 append 方法的源码：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">StringBuilder</span> <span class="nf">append</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">super</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">str</span><span class="o">);</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>这 3 行代码没啥可看的，可看的是父类 AbstractStringBuilder 的 append 方法：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">AbstractStringBuilder</span> <span class="nf">append</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">str</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+        <span class="k">return</span> <span class="nf">appendNull</span><span class="o">();</span>
+    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+    <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">count</span> <span class="o">+</span> <span class="n">len</span><span class="o">);</span>
+    <span class="n">str</span><span class="o">.</span><span class="na">getChars</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">count</span><span class="o">);</span>
+    <span class="n">count</span> <span class="o">+=</span> <span class="n">len</span><span class="o">;</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）判断拼接的字符串是不是 null，如果是，当做字符串“null”来处理。<code class="highlighter-rouge">appendNull</code> 方法的源码如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="nc">AbstractStringBuilder</span> <span class="nf">appendNull</span><span class="o">()</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">c</span> <span class="o">=</span> <span class="n">count</span><span class="o">;</span>
+    <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">c</span> <span class="o">+</span> <span class="mi">4</span><span class="o">);</span>
+    <span class="kd">final</span> <span class="kt">char</span><span class="o">[]</span> <span class="n">value</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">value</span><span class="o">;</span>
+    <span class="n">value</span><span class="o">[</span><span class="n">c</span><span class="o">++]</span> <span class="o">=</span> <span class="sc">'n'</span><span class="o">;</span>
+    <span class="n">value</span><span class="o">[</span><span class="n">c</span><span class="o">++]</span> <span class="o">=</span> <span class="sc">'u'</span><span class="o">;</span>
+    <span class="n">value</span><span class="o">[</span><span class="n">c</span><span class="o">++]</span> <span class="o">=</span> <span class="sc">'l'</span><span class="o">;</span>
+    <span class="n">value</span><span class="o">[</span><span class="n">c</span><span class="o">++]</span> <span class="o">=</span> <span class="sc">'l'</span><span class="o">;</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">c</span><span class="o">;</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>2）拼接后的字符数组长度是否超过当前值，如果超过，进行扩容并复制。<code class="highlighter-rouge">ensureCapacityInternal</code> 方法的源码如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kt">void</span> <span class="nf">ensureCapacityInternal</span><span class="o">(</span><span class="kt">int</span> <span class="n">minimumCapacity</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// overflow-conscious code</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">minimumCapacity</span> <span class="o">-</span> <span class="n">value</span><span class="o">.</span><span class="na">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">value</span><span class="o">,</span>
+                <span class="n">newCapacity</span><span class="o">(</span><span class="n">minimumCapacity</span><span class="o">));</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>3）将拼接的字符串 str 复制到目标数组 value 中。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">str</span><span class="o">.</span><span class="na">getChars</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">len</span><span class="o">,</span> <span class="n">value</span><span class="o">,</span> <span class="n">count</span><span class="o">)</span>
+</code></pre></div></div>
+
+<h3 id="03stringbuffer">03、StringBuffer</h3>
+
+<p>先有 StringBuffer 后有 StringBuilder，两者就像是孪生双胞胎，该有的都有，只不过大哥 StringBuffer 因为多呼吸两口新鲜空气，所以是线程安全的。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">synchronized</span> <span class="nc">StringBuffer</span> <span class="nf">append</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">toStringCache</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="kd">super</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">str</span><span class="o">);</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>StringBuffer 类的 append 方法比 StringBuilder 多了一个关键字 synchronized，可暂时忽略 <code class="highlighter-rouge">toStringCache = null</code>。</p>
+
+<p>synchronized 是 Java 中的一个非常容易脸熟的关键字，是一种同步锁。它修饰的方法被称为同步方法，是线程安全的。</p>
+
+<h3 id="04string-类的-concat-方法">04、String 类的 concat 方法</h3>
+
+<p>单就姿势上来看，String 类的 concat 方法就好像 StringBuilder 类的 append。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">chenmo</span> <span class="o">=</span> <span class="s">"沉默"</span><span class="o">;</span>
+<span class="nc">String</span> <span class="n">wanger</span> <span class="o">=</span> <span class="s">"王二"</span><span class="o">;</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">chenmo</span><span class="o">.</span><span class="na">concat</span><span class="o">(</span><span class="n">wanger</span><span class="o">));</span>
+</code></pre></div></div>
+
+<p>文章写到这的时候，我突然产生了一个奇妙的想法。假如有这样两行代码：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">chenmo</span> <span class="o">+=</span> <span class="n">wanger</span>
+<span class="n">chenmo</span> <span class="o">=</span> <span class="n">chenmo</span><span class="o">.</span><span class="na">concat</span><span class="o">(</span><span class="n">wanger</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>它们之间究竟有多大的差别呢？</p>
+
+<p>之前我们已经了解到，<code class="highlighter-rouge">chenmo += wanger</code> 实际上相当于 <code class="highlighter-rouge">(new StringBuilder(String.valueOf(chenmo))).append(wanger).toString()</code>。</p>
+
+<p>要探究“+”号操作符和 <code class="highlighter-rouge">concat</code> 之间的差别，实际上要看 append 方法和 concat 方法之间的差别。</p>
+
+<p>append 方法的源码之前分析过了。我们就来看一下 concat 方法的源码吧。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="nc">String</span> <span class="nf">concat</span><span class="o">(</span><span class="nc">String</span> <span class="n">str</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">otherLen</span> <span class="o">=</span> <span class="n">str</span><span class="o">.</span><span class="na">length</span><span class="o">();</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">otherLen</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+    <span class="kt">char</span> <span class="n">buf</span><span class="o">[]</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">value</span><span class="o">,</span> <span class="n">len</span> <span class="o">+</span> <span class="n">otherLen</span><span class="o">);</span>
+    <span class="n">str</span><span class="o">.</span><span class="na">getChars</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="n">len</span><span class="o">);</span>
+    <span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）如果拼接的字符串的长度为 0，那么返回拼接前的字符串。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">if</span> <span class="o">(</span><span class="n">otherLen</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="k">this</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>2）将原字符串的字符数组 value 复制到变量 buf 数组中。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kt">char</span> <span class="n">buf</span><span class="o">[]</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">value</span><span class="o">,</span> <span class="n">len</span> <span class="o">+</span> <span class="n">otherLen</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>3）把拼接的字符串 str 复制到字符数组 buf 中，并返回新的字符串对象。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">str</span><span class="o">.</span><span class="na">getChars</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="n">len</span><span class="o">);</span>
+<span class="k">return</span> <span class="k">new</span> <span class="nf">String</span><span class="o">(</span><span class="n">buf</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>通过源码分析我们大致可以得出以下结论：</p>
+
+<p>1）如果拼接的字符串是 null，concat 时候就会抛出 NullPointerException，“+”号操作符会当做是“null”字符串来处理。</p>
+
+<p>2）如果拼接的字符串是一个空字符串（”“），那么 concat 的效率要更高一点。毕竟不需要 <code class="highlighter-rouge">new  StringBuilder</code> 对象。</p>
+
+<p>3）如果拼接的字符串非常多，concat 的效率就会下降，因为创建的字符串对象越多，开销就越大。</p>
+
+<p><strong>注意了！！！</strong></p>
+
+<p>弱弱地问一下啊，还有在用 JSP 的同学吗？EL 表达式中是不允许使用“+”操作符来拼接字符串的，这时候就只能用 <code class="highlighter-rouge">concat</code> 了。</p>
+
+<div class="language-jsp highlighter-rouge"><div class="highlight"><pre class="highlight"><code>${chenmo.concat('-').concat(wanger)}
+</code></pre></div></div>
+
+<h3 id="05string-类的-join-方法">05、String 类的 join 方法</h3>
+
+<p>JDK 1.8 提供了一种新的字符串拼接姿势：String 类增加了一个静态方法 join。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">chenmo</span> <span class="o">=</span> <span class="s">"沉默"</span><span class="o">;</span>
+<span class="nc">String</span> <span class="n">wanger</span> <span class="o">=</span> <span class="s">"王二"</span><span class="o">;</span>
+<span class="nc">String</span> <span class="n">cmower</span> <span class="o">=</span> <span class="nc">String</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="s">""</span><span class="o">,</span> <span class="n">chenmo</span><span class="o">,</span> <span class="n">wanger</span><span class="o">);</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">cmower</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>第一个参数为字符串连接符，比如说：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">message</span> <span class="o">=</span> <span class="nc">String</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="s">"-"</span><span class="o">,</span> <span class="s">"王二"</span><span class="o">,</span> <span class="s">"太特么"</span><span class="o">,</span> <span class="s">"有趣了"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>输出结果为：王二-太特么-有趣了</p>
+
+<p>我们来看一下 join 方法的源码：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">join</span><span class="o">(</span><span class="nc">CharSequence</span> <span class="n">delimiter</span><span class="o">,</span> <span class="nc">CharSequence</span><span class="o">...</span> <span class="n">elements</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">Objects</span><span class="o">.</span><span class="na">requireNonNull</span><span class="o">(</span><span class="n">delimiter</span><span class="o">);</span>
+    <span class="nc">Objects</span><span class="o">.</span><span class="na">requireNonNull</span><span class="o">(</span><span class="n">elements</span><span class="o">);</span>
+    <span class="c1">// Number of elements not likely worth Arrays.stream overhead.</span>
+    <span class="nc">StringJoiner</span> <span class="n">joiner</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringJoiner</span><span class="o">(</span><span class="n">delimiter</span><span class="o">);</span>
+    <span class="k">for</span> <span class="o">(</span><span class="nc">CharSequence</span> <span class="nl">cs:</span> <span class="n">elements</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">joiner</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">cs</span><span class="o">);</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">joiner</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>发现了一个新类 StringJoiner，类名看起来很 6，读起来也很顺口。StringJoiner 是 <code class="highlighter-rouge">java.util</code> 包中的一个类，用于构造一个由分隔符重新连接的字符序列。限于篇幅，本文就不再做过多介绍了，感兴趣的同学可以去了解一下。</p>
+
+<h3 id="06stringutilsjoin">06、StringUtils.join</h3>
+
+<p>实战项目当中，我们处理字符串的时候，经常会用到这个类——<code class="highlighter-rouge">org.apache.commons.lang3.StringUtils</code>，该类的 join 方法是字符串拼接的一种新姿势。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">chenmo</span> <span class="o">=</span> <span class="s">"沉默"</span><span class="o">;</span>
+<span class="nc">String</span> <span class="n">wanger</span> <span class="o">=</span> <span class="s">"王二"</span><span class="o">;</span>
+
+<span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="n">chenmo</span><span class="o">,</span> <span class="n">wanger</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>该方法更善于拼接数组中的字符串，并且不用担心 NullPointerException。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">(</span><span class="kc">null</span><span class="o">)</span>            <span class="o">=</span> <span class="kc">null</span>
+<span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">([])</span>              <span class="o">=</span> <span class="s">""</span>
+<span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">([</span><span class="kc">null</span><span class="o">])</span>          <span class="o">=</span> <span class="s">""</span>
+<span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">([</span><span class="s">"a"</span><span class="o">,</span> <span class="s">"b"</span><span class="o">,</span> <span class="s">"c"</span><span class="o">])</span> <span class="o">=</span> <span class="s">"abc"</span>
+<span class="nc">StringUtils</span><span class="o">.</span><span class="na">join</span><span class="o">([</span><span class="kc">null</span><span class="o">,</span> <span class="s">""</span><span class="o">,</span> <span class="s">"a"</span><span class="o">])</span> <span class="o">=</span> <span class="s">"a"</span>
+</code></pre></div></div>
+
+<p>通过查看源码我们可以发现，其内部使用的仍然是 StringBuilder。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="nc">String</span> <span class="nf">join</span><span class="o">(</span><span class="kd">final</span> <span class="nc">Object</span><span class="o">[]</span> <span class="n">array</span><span class="o">,</span> <span class="nc">String</span> <span class="n">separator</span><span class="o">,</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">startIndex</span><span class="o">,</span> <span class="kd">final</span> <span class="kt">int</span> <span class="n">endIndex</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">array</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">separator</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">separator</span> <span class="o">=</span> <span class="no">EMPTY</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">final</span> <span class="nc">StringBuilder</span> <span class="n">buf</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">(</span><span class="n">noOfItems</span> <span class="o">*</span> <span class="mi">16</span><span class="o">);</span>
+
+    <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">startIndex</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">endIndex</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="n">startIndex</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">buf</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">separator</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">if</span> <span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">buf</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">array</span><span class="o">[</span><span class="n">i</span><span class="o">]);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="na">toString</span><span class="o">();</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>大家读到这，不约而同会有这样一种感觉：我靠（音要拖长），没想到啊没想到，字符串拼接足足有 6 种姿势啊，晚上回到家一定要一一尝试下。</p>
+
+<h3 id="07给小菜一个答复">07、给小菜一个答复</h3>
+
+<p>我相信，小菜读到我这篇文章的时候，他一定会明白为什么阿里巴巴不建议在 for 循环中使用”+”号操作符进行字符串拼接了。</p>
+
+<p>来看两段代码。</p>
+
+<p>第一段，for 循环中使用”+”号操作符。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">result</span> <span class="o">=</span> <span class="s">""</span><span class="o">;</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="s">"六六六"</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>第二段，for 循环中使用 append。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">StringBuilder</span> <span class="n">sb</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">100000</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="n">sb</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="s">"六六六"</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>这两段代码分别会耗时多长时间呢？在我的 iMac 上测试出的结果是：</p>
+
+<p>1）第一段代码执行完的时间为 6212 毫秒</p>
+
+<p>2）第二段代码执行完的时间为 1 毫秒</p>
+
+<p>差距也太特么大了吧！为什么呢？</p>
+
+<p>我相信有不少同学已经有了自己的答案：第一段的 for 循环中创建了大量的 StringBuilder 对象，而第二段代码至始至终只有一个  StringBuilder 对象。</p>
+
+<h3 id="08最后">08、最后</h3>
+
+<p>谢谢大家的阅读，原创不易，喜欢就随手点个赞👍，这将是我最强的写作动力。如果觉得文章对你有点帮助，还挺有趣，就关注一下我的公众号「<strong>沉默王二</strong>」；回复「<strong>666</strong>」更有 500G 高质量教学视频相送（<a href="https://mp.weixin.qq.com/s/GjkEyPW0vgIvuDLYQkBM0A">已分门别类</a>）。</p>
+:ET

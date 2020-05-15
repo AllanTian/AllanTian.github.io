@@ -1,0 +1,376 @@
+I"3�<p>本篇通过一种趣味化的形式来讲述 Java 的<a href="http://www.itwanger.com/java/2019/11/14/java-jihe.html">集合</a>。</p>
+
+<!--more-->
+
+<h3 id="00故事的起源">00、故事的起源</h3>
+
+<p>“二哥，上一篇《<a href="http://www.itwanger.com/java/2019/11/14/java-fanxing.html">泛型</a>》的反响效果怎么样啊？”三妹对她提议的《教妹学 Java》专栏很是关心。</p>
+
+<p>“有人评论说，‘二哥你敲代码都敲出幻想了啊。’”</p>
+
+<p>“呵呵，这句话充斥着满满的讽刺意味啊。”三妹有点难过了起来。</p>
+
+<p>“不过，也有人评论说，‘建议这个系列的文章多写啊，因为我花了半个月都没看懂《 Java 编程思想》中关于泛型的讲解，但再看完这篇文章后终于融会贯通了，比心。’”</p>
+
+<p>“二哥，你能不能先说好消息啊？真是的。我也要给这位暖心的读者比心了。”三妹说完这句话就在我面前比了一个心，我瞅了她一眼，发现她之前的愁容也无影无踪了。</p>
+
+<p>“那接下来，二哥还要继续写吗？”我看到了三妹深情的目光。</p>
+
+<p>“嗯，我想该写集合了。”</p>
+
+<p>“那就让我继续来提问吧，二哥你继续来回答。”三妹已经跃跃欲试了。</p>
+
+<h3 id="01二哥什么是集合啊">01、二哥，什么是集合啊？</h3>
+
+<p>三妹，听哥慢慢给你讲啊。</p>
+
+<p>JDK 1.2 的时候引入了集合的概念，用来包含一组数据结构。与数组不同的是，这些数据结构的存储空间会随着元素增加而动态增加。其中，有一些集合类支持添加重复元素，而另一些不支持；有一些支持添加 <code class="highlighter-rouge">null</code> 元素，而另一些不支持。</p>
+
+<p>可以根据继承体系将集合分为两大类，一类实现了 <code class="highlighter-rouge">Collection</code> 接口（见图 1），另一类实现了 <code class="highlighter-rouge">Map</code> 接口（见图 2）。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-jihe-jiaomei-1.png" alt="图 1" /></p>
+
+<p>介绍一下图 1：</p>
+
+<p>1）<code class="highlighter-rouge">Collection</code> 是所有集合类的根接口。</p>
+
+<p>2）<code class="highlighter-rouge">Set</code> 接口的实现类不允许重复的元素，例如 <code class="highlighter-rouge">HashSet</code>、<code class="highlighter-rouge">LinkedHashSet</code>。</p>
+
+<p>3）<code class="highlighter-rouge">List</code> 接口的实现类允许重复元素，可通过 <code class="highlighter-rouge">index</code> 访问对应位置上的元素，例如 <code class="highlighter-rouge">LinkedList</code>、<code class="highlighter-rouge">ArrayList</code>。</p>
+
+<p>4）<code class="highlighter-rouge">Queue</code> 接口的实现类允许在队列的尾部或者头部增加或者删除元素，例如 <code class="highlighter-rouge">PriorityQueue</code>。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-jihe-jiaomei-2.png" alt="图 2" /></p>
+
+<p>介绍一下图 2：</p>
+
+<p>1）<code class="highlighter-rouge">HashMap</code> 是最常用的 <code class="highlighter-rouge">Map</code>，可以根据键直接获取对应的值，它根据键的 <code class="highlighter-rouge">hashCode</code> 值存储数据，所以访问速度非常快。<code class="highlighter-rouge">HashMap</code> 最多只允许一条记录的键为 <code class="highlighter-rouge">null</code> (多条会覆盖)；但允许多条记录的值为 <code class="highlighter-rouge">null</code>。</p>
+
+<p>2）<code class="highlighter-rouge">TreeMap</code> 能够把它保存的记录根据键（不允许键的值为 <code class="highlighter-rouge">null</code>）排序，默认是升序，也可以指定排序的比较器，当用迭代器（<code class="highlighter-rouge">Iterator</code>）遍历 <code class="highlighter-rouge">TreeMap</code> 时，得到的记录是排过序的。</p>
+
+<p>3）<code class="highlighter-rouge">Hashtable</code> 的键和值均不允许为 <code class="highlighter-rouge">null</code>，是线程同步的，也就是说任一时刻只有一个线程能写 <code class="highlighter-rouge">Hashtable</code>，线程同步会消耗掉一些性能，因此 <code class="highlighter-rouge">Hashtable</code> 在写入时花费的时间也会比较多。</p>
+
+<p>4）<code class="highlighter-rouge">LinkedHashMap</code> 保存了记录的插入顺序，当用迭代器（<code class="highlighter-rouge">Iterator</code>）遍历 <code class="highlighter-rouge">LinkedHashMap</code> 时，先得到的记录肯定是先插入的。键和值均允许为 <code class="highlighter-rouge">null</code>。</p>
+
+<p>有了集合的帮助，程序员不再需要亲自实现元素的排序、查找等底层算法了。另外，基于数组实现的集合类在频繁读取时性能更佳，比如说 <code class="highlighter-rouge">ArrayList</code>；基于队列实现的集合类在频繁增加、更新、删除数据时效率更高，比如说 <code class="highlighter-rouge">LinkedList</code>；程序员所要做的就是，根据业务需要选择适当的集合类，至于性能调优嘛，可以微信找二哥。</p>
+
+<h3 id="02二哥linkedlist-和-arraylist-有什么区别啊">02、二哥，LinkedList 和 ArrayList 有什么区别啊？</h3>
+
+<p>三妹，刚提完问题就打盹啊，继续听哥给你慢慢讲啊。</p>
+
+<p><strong><code class="highlighter-rouge">LinkedList</code> 其实是一个双向链表</strong>，来看源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">LinkedList</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span>
+<span class="o">{</span>
+    <span class="kd">transient</span> <span class="kt">int</span> <span class="n">size</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * Pointer to first node.
+     * Invariant: (first == null &amp;&amp; last == null) ||
+     *            (first.prev == null &amp;&amp; first.item != null)
+     */</span>
+    <span class="kd">transient</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">first</span><span class="o">;</span>
+
+    <span class="cm">/**
+     * Pointer to last node.
+     * Invariant: (first == null &amp;&amp; last == null) ||
+     *            (last.next == null &amp;&amp; last.item != null)
+     */</span>
+    <span class="kd">transient</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">last</span><span class="o">;</span>
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="o">{</span>
+        <span class="no">E</span> <span class="n">item</span><span class="o">;</span>
+        <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">next</span><span class="o">;</span>
+        <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">prev</span><span class="o">;</span>
+
+        <span class="nc">Node</span><span class="o">(</span><span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">prev</span><span class="o">,</span> <span class="no">E</span> <span class="n">element</span><span class="o">,</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">next</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">item</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">next</span><span class="o">;</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">prev</span> <span class="o">=</span> <span class="n">prev</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）<code class="highlighter-rouge">LinkedList</code> 包含一个非常重要的内部类——<code class="highlighter-rouge">Node</code>。<code class="highlighter-rouge">Node</code> 是节点所对应的数据结构，<code class="highlighter-rouge">item</code> 为当前节点的值，<code class="highlighter-rouge">prev</code> 为上一个节点，<code class="highlighter-rouge">next</code> 为下一个节点——这也正是“双向”链表的原因。<code class="highlighter-rouge">first</code> 为 <code class="highlighter-rouge">LinkedList</code> 的第一个节点，<code class="highlighter-rouge">last</code> 为最后一个节点。</p>
+
+<p>2）<code class="highlighter-rouge">size</code> 是 <code class="highlighter-rouge">LinkedList</code> 的节点个数。当往  <code class="highlighter-rouge">LinkedList</code> 添加一个元素时，size+1，删除一个元素时，size-1。</p>
+
+<p><strong><code class="highlighter-rouge">ArrayList</code> 其实是一个动态数组</strong>，来看源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span>
+<span class="o">{</span>
+     <span class="cm">/**
+     * The array buffer into which the elements of the ArrayList are stored.
+     * The capacity of the ArrayList is the length of this array buffer. Any
+     * empty ArrayList with elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA
+     * will be expanded to DEFAULT_CAPACITY when the first element is added.
+     */</span>
+    <span class="kd">transient</span> <span class="nc">Object</span><span class="o">[]</span> <span class="n">elementData</span><span class="o">;</span> <span class="c1">// non-private to simplify nested class access</span>
+
+    <span class="cm">/**
+     * The size of the ArrayList (the number of elements it contains).
+     *
+     * @serial
+     */</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">size</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）<code class="highlighter-rouge">elementData</code> 是 <code class="highlighter-rouge">Object</code> 类型的数组，用来保存添加到 <code class="highlighter-rouge">ArrayList</code> 中的元素。如果通过默认构造参数创建 <code class="highlighter-rouge">ArrayList</code> 对象时，<code class="highlighter-rouge">elementData</code> 的默认大小是 10。当 <code class="highlighter-rouge">ArrayList</code> 容量不足以容纳全部元素时，就会重新设置容量，新的容量 = <code class="highlighter-rouge">原始容量 + (原始容量 &gt;&gt; 1)</code>（参照以下代码）。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kt">void</span> <span class="nf">grow</span><span class="o">(</span><span class="kt">int</span> <span class="n">minCapacity</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// overflow-conscious code</span>
+    <span class="kt">int</span> <span class="n">oldCapacity</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">.</span><span class="na">length</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">newCapacity</span> <span class="o">=</span> <span class="n">oldCapacity</span> <span class="o">+</span> <span class="o">(</span><span class="n">oldCapacity</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">);</span>
+    <span class="n">elementData</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">copyOf</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">newCapacity</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">&gt;&gt;</code> 运算符还没有驾驭了。不过，通过代码测试后的结论是，当原始容量为 10 的时候，新的容量为 15；当原始容量为 20 的时候，新的容量为 30。</p>
+
+<p>2） <code class="highlighter-rouge">size</code> 是 <code class="highlighter-rouge">ArrayList</code> 的元素个数。当往  <code class="highlighter-rouge">ArrayList</code> 添加一个元素时，size+1，删除一个元素时，size-1。</p>
+
+<p>由于 <code class="highlighter-rouge">LinkedList</code> 和 <code class="highlighter-rouge">ArrayList</code> 底层实现的不同（一个双向链表，一个动态数组），它们之间的区别也很一目了然。</p>
+
+<p><strong>关键点1 ：<code class="highlighter-rouge">LinkedList</code> 在添加（<code class="highlighter-rouge">add(E e)</code>）、插入（<code class="highlighter-rouge">add(int index, E element)</code>）、删除（<code class="highlighter-rouge">remove(int index)</code>）元素的性能上远超 <code class="highlighter-rouge">ArrayList</code></strong>。</p>
+
+<p>为什么呢？先来看 <code class="highlighter-rouge">ArrayList</code> 的相关源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// ensureCapacityInternal() 方法内部会调用 System.arraycopy()</span>
+<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">add</span><span class="o">(</span><span class="no">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">ensureCapacityInternal</span><span class="o">(</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  <span class="c1">// Increments modCount!!</span>
+    <span class="n">elementData</span><span class="o">[</span><span class="n">size</span><span class="o">++]</span> <span class="o">=</span> <span class="n">e</span><span class="o">;</span>
+    <span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">,</span> <span class="no">E</span> <span class="n">element</span><span class="o">)</span> <span class="o">{</span>
+    <span class="nc">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="o">,</span>
+                     <span class="n">size</span> <span class="o">-</span> <span class="n">index</span><span class="o">);</span>
+    <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">;</span>
+    <span class="n">size</span><span class="o">++;</span>
+<span class="o">}</span>
+
+<span class="kd">public</span> <span class="no">E</span> <span class="nf">remove</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+    <span class="no">E</span> <span class="n">oldValue</span> <span class="o">=</span> <span class="n">elementData</span><span class="o">(</span><span class="n">index</span><span class="o">);</span>
+
+    <span class="kt">int</span> <span class="n">numMoved</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">index</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">numMoved</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">arraycopy</span><span class="o">(</span><span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="o">,</span> <span class="n">elementData</span><span class="o">,</span> <span class="n">index</span><span class="o">,</span>
+                         <span class="n">numMoved</span><span class="o">);</span>
+    <span class="n">elementData</span><span class="o">[--</span><span class="n">size</span><span class="o">]</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span> <span class="c1">// clear to let GC do its work</span>
+
+    <span class="k">return</span> <span class="n">oldValue</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>观察 <code class="highlighter-rouge">ArrayList</code> 的源码，就能够发现，<code class="highlighter-rouge">ArrayList</code> 在添加、插入、删除元素的时候，会有意或者无意（扩容）的调用 <code class="highlighter-rouge">System.arraycopy(Object src,  int  srcPos, Object dest, int destPos, int length)</code> 方法，该方法对性能的损耗是非常严重的。</p>
+
+<p>再来看 <code class="highlighter-rouge">LinkedList</code> 的相关源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Links e as last element.
+ */</span>
+<span class="kt">void</span> <span class="nf">linkLast</span><span class="o">(</span><span class="no">E</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kd">final</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="n">last</span><span class="o">;</span>
+    <span class="kd">final</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">newNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Node</span><span class="o">&lt;&gt;(</span><span class="n">l</span><span class="o">,</span> <span class="n">e</span><span class="o">,</span> <span class="kc">null</span><span class="o">);</span>
+    <span class="n">last</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+    <span class="k">if</span> <span class="o">(</span><span class="n">l</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+    <span class="k">else</span>
+        <span class="n">l</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">newNode</span><span class="o">;</span>
+<span class="o">}</span>
+<span class="cm">/**
+ * Unlinks non-null node x.
+ */</span>
+<span class="no">E</span> <span class="nf">unlink</span><span class="o">(</span><span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">x</span><span class="o">)</span> <span class="o">{</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">prev</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="n">next</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="n">prev</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="n">next</span><span class="o">;</span>
+        <span class="n">x</span><span class="o">.</span><span class="na">prev</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">next</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">last</span> <span class="o">=</span> <span class="n">prev</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="n">next</span><span class="o">.</span><span class="na">prev</span> <span class="o">=</span> <span class="n">prev</span><span class="o">;</span>
+        <span class="n">x</span><span class="o">.</span><span class="na">next</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="n">x</span><span class="o">.</span><span class="na">item</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+    <span class="k">return</span> <span class="n">element</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">LinkedList</code> 不存在扩容的问题，也不需要对原有的元素进行复制；只需要改变节点的数据就好了。</p>
+
+<p><strong>关键点2：<code class="highlighter-rouge">LinkedList</code> 在查找元素时要慢于 <code class="highlighter-rouge">ArrayList</code></strong>。</p>
+
+<p>为什么呢？先来看 LinkedList 的相关源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/**
+ * Returns the (non-null) Node at the specified element index.
+ */</span>
+<span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="nf">node</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// assert isElementIndex(index);</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">index</span> <span class="o">&lt;</span> <span class="o">(</span><span class="n">size</span> <span class="o">&gt;&gt;</span> <span class="mi">1</span><span class="o">))</span> <span class="o">{</span>
+        <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">first</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">index</span><span class="o">;</span> <span class="n">i</span><span class="o">++)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="na">next</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">;</span>
+    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+        <span class="nc">Node</span><span class="o">&lt;</span><span class="no">E</span><span class="o">&gt;</span> <span class="n">x</span> <span class="o">=</span> <span class="n">last</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="n">index</span><span class="o">;</span> <span class="n">i</span><span class="o">--)</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="na">prev</span><span class="o">;</span>
+        <span class="k">return</span> <span class="n">x</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>观察 <code class="highlighter-rouge">LinkedList</code> 的源码，就能够发现， <code class="highlighter-rouge">LinkedList</code> 在定位 <code class="highlighter-rouge">index</code> 的时候会先判断位置（是在 1 / 2 的前面还是后面），再从前往后或者从后往前执行 <code class="highlighter-rouge">for</code> 循环依次找。</p>
+
+<p>再来看 <code class="highlighter-rouge">ArrayList</code> 的相关源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@SuppressWarnings</span><span class="o">(</span><span class="s">"unchecked"</span><span class="o">)</span>
+<span class="no">E</span> <span class="nf">elementData</span><span class="o">(</span><span class="kt">int</span> <span class="n">index</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="o">(</span><span class="no">E</span><span class="o">)</span> <span class="n">elementData</span><span class="o">[</span><span class="n">index</span><span class="o">];</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">ArrayList</code> 直接根据 <code class="highlighter-rouge">index</code> 从数组中取出该位置上的元素，不需要 <code class="highlighter-rouge">for</code> 循环遍历啊——这样显然更快！</p>
+
+<h3 id="03二哥hashmap-和-treemap-有什么区别啊">03、二哥，HashMap 和 TreeMap 有什么区别啊？</h3>
+
+<p>三妹，提问题越来越有艺术了啊？继续听哥给你慢慢讲啊。</p>
+
+<p><code class="highlighter-rouge">HashMap</code> 存储的是键值对，其键是一个<a href="http://www.itwanger.com/java/2019/11/08/java-hashmap.html">哈希码</a>（Hash 的直译，也称作散列）。来看源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span>
+<span class="o">{</span>
+    <span class="kd">transient</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;[]</span> <span class="n">table</span><span class="o">;</span>
+    <span class="kd">static</span> <span class="kd">class</span> <span class="nc">Node</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="nc">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="o">{</span>
+        <span class="kd">final</span> <span class="kt">int</span> <span class="n">hash</span><span class="o">;</span>
+        <span class="kd">final</span> <span class="no">K</span> <span class="n">key</span><span class="o">;</span>
+        <span class="no">V</span> <span class="n">value</span><span class="o">;</span>
+        <span class="nc">Node</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="n">next</span><span class="o">;</span>
+    <span class="o">}</span>
+    <span class="kd">public</span> <span class="nf">HashMap</span><span class="o">(</span><span class="kt">int</span> <span class="n">initialCapacity</span><span class="o">,</span> <span class="kt">float</span> <span class="n">loadFactor</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">loadFactor</span> <span class="o">=</span> <span class="n">loadFactor</span><span class="o">;</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">threshold</span> <span class="o">=</span> <span class="n">tableSizeFor</span><span class="o">(</span><span class="n">initialCapacity</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）<code class="highlighter-rouge">table</code> 是一个 <code class="highlighter-rouge">Node</code> 数组，而 <code class="highlighter-rouge">Node</code> 是一个单向链表（只有 next）。<code class="highlighter-rouge">HashMap</code> 的键值对就存储在 <code class="highlighter-rouge">table</code> 数组中。</p>
+
+<p>2）<code class="highlighter-rouge">loadFactor</code> 就是大名鼎鼎的加载因子，默认的加载因子是 0.75, 据说这是在时间和空间成本上寻求的一种折衷。</p>
+
+<p>3）<code class="highlighter-rouge">initialCapacity</code> 就是初始容量，默认为 16。
+　　
+4）<code class="highlighter-rouge">threshold</code> 是 <code class="highlighter-rouge">HashMap</code> 的阈值——判断是否需要对 <code class="highlighter-rouge">HashMap</code> 进行扩容，<code class="highlighter-rouge">threshold</code> 的值 = 容量 * 加载因子，当 <code class="highlighter-rouge">HashMap</code> 中存储的数据数量达到 <code class="highlighter-rouge">threshold</code> 时，就需要将 <code class="highlighter-rouge">HashMap</code> 的容量加倍。</p>
+
+<p>“初始容量” 和 “加载因子”对 <code class="highlighter-rouge">HashMap</code> 的性能影响颇大。容量是 <code class="highlighter-rouge">HashMap</code> 中桶（见下图）的数量，初始容量只是 <code class="highlighter-rouge">HashMap</code> 在创建时的容量。加载因子是 <code class="highlighter-rouge">HashMap</code> 在其容量自动增加之前可以达到多满的一种尺度。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-jihe-jiaomei-3.png" alt="图 3" /></p>
+
+<p><code class="highlighter-rouge">TreeMap</code> 存储的是<strong>有序的</strong>键值对，基于<strong>红黑树（Red-Black tree）实现</strong>。可以在初始化的时候指定键位的排序方式，如果没有指定的话就根据键位的自然顺序进行排序。来看源码。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">TreeMap</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span>
+<span class="o">{</span>
+    <span class="kd">private</span> <span class="kd">final</span> <span class="nc">Comparator</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="no">K</span><span class="o">&gt;</span> <span class="n">comparator</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">transient</span> <span class="nc">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="n">root</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="no">RED</span>   <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+    <span class="kd">private</span> <span class="kd">static</span> <span class="kd">final</span> <span class="kt">boolean</span> <span class="no">BLACK</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span>
+    <span class="kd">static</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="kd">implements</span> <span class="nc">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="o">{</span>
+        <span class="no">K</span> <span class="n">key</span><span class="o">;</span>
+        <span class="no">V</span> <span class="n">value</span><span class="o">;</span>
+        <span class="nc">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="n">left</span><span class="o">;</span>
+        <span class="nc">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="n">right</span><span class="o">;</span>
+        <span class="nc">Entry</span><span class="o">&lt;</span><span class="no">K</span><span class="o">,</span><span class="no">V</span><span class="o">&gt;</span> <span class="n">parent</span><span class="o">;</span>
+        <span class="kt">boolean</span> <span class="n">color</span> <span class="o">=</span> <span class="no">BLACK</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>1）<code class="highlighter-rouge">root</code> 是红黑树的根节点，是一个 <code class="highlighter-rouge">Entry</code> 类型（按照 key 进行排序），包含了 key（键）、value（值）、left（左边的子节点）、right（右边的子节点）、parent（父节点）、color（颜色）。</p>
+
+<p>2）<code class="highlighter-rouge">comparator</code> 是红黑树的排序方式，是一个 <code class="highlighter-rouge">Comparator</code> 接口类型，该接口里面有一个 <code class="highlighter-rouge">compare</code> 方法，有两个参数 <code class="highlighter-rouge">T o1</code> 和 <code class="highlighter-rouge">T o2</code>，是泛型的表示方式，表示待比较的两个对象，该方法的返回值是一个整形， o1大于o2，返回正整数； o1等于o2，返回0；o1小于o3，返回负整数。</p>
+
+<p>总结一下就是，<code class="highlighter-rouge">HashMap</code> 适用于在 <code class="highlighter-rouge">Map</code> 中插入、删除和定位元素；<code class="highlighter-rouge">TreeMap</code> 适用于按自然顺序或自定义顺序遍历键（key）。</p>
+
+<h3 id="04二哥再讲讲二分查找呗">04、二哥，再讲讲二分查找呗！</h3>
+
+<p>三妹，没有任何问题，包在我身上。不过，在讲之前，你能先去给哥泡杯咖啡吗？</p>
+
+<p>通常，我们从数组中查找一个元素时，需要对整个数组进行遍历。但如果这个数组是排序过的，就可以进行二分查找了。</p>
+
+<p>二分查找的方式：</p>
+
+<p>第一步，将数组中间位置上的元素与要查找的对象进行比较，如果两者相等，则查找成功；否则进行第二步。</p>
+
+<p>第二步，利用中间位置将数组分割成前、后两个子集。</p>
+
+<p>第三步，比较要查找的对象与中间位置上的元素，如果前者大于后者，则在后面的子集中按照之前的方式进行查找；否则，在前面的子集中按照之前的方式进行查找。</p>
+
+<p>这样做可以将查找范围缩减一半，大大的减少了查询的次数。</p>
+
+<p><code class="highlighter-rouge">Collections</code> 类的 <code class="highlighter-rouge">binarySearch()</code> 方法实现了二分查找这个算法，可以直接使用，前提是先要排序，否则将返回 -2。源码如下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">private</span> <span class="kd">static</span> <span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span>
+<span class="kt">int</span> <span class="nf">indexedBinarySearch</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;?</span> <span class="kd">extends</span> <span class="nc">Comparable</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="no">T</span><span class="o">&gt;&gt;</span> <span class="n">list</span><span class="o">,</span> <span class="no">T</span> <span class="n">key</span><span class="o">)</span> <span class="o">{</span>
+    <span class="kt">int</span> <span class="n">low</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+    <span class="kt">int</span> <span class="n">high</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">()-</span><span class="mi">1</span><span class="o">;</span>
+
+    <span class="k">while</span> <span class="o">(</span><span class="n">low</span> <span class="o">&lt;=</span> <span class="n">high</span><span class="o">)</span> <span class="o">{</span>
+        <span class="kt">int</span> <span class="n">mid</span> <span class="o">=</span> <span class="o">(</span><span class="n">low</span> <span class="o">+</span> <span class="n">high</span><span class="o">)</span> <span class="o">&gt;&gt;&gt;</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="nc">Comparable</span><span class="o">&lt;?</span> <span class="kd">super</span> <span class="no">T</span><span class="o">&gt;</span> <span class="n">midVal</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">mid</span><span class="o">);</span>
+        <span class="kt">int</span> <span class="n">cmp</span> <span class="o">=</span> <span class="n">midVal</span><span class="o">.</span><span class="na">compareTo</span><span class="o">(</span><span class="n">key</span><span class="o">);</span>
+
+        <span class="k">if</span> <span class="o">(</span><span class="n">cmp</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">low</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">cmp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="o">)</span>
+            <span class="n">high</span> <span class="o">=</span> <span class="n">mid</span> <span class="o">-</span> <span class="mi">1</span><span class="o">;</span>
+        <span class="k">else</span>
+            <span class="k">return</span> <span class="n">mid</span><span class="o">;</span> <span class="c1">// key found</span>
+    <span class="o">}</span>
+    <span class="k">return</span> <span class="o">-(</span><span class="n">low</span> <span class="o">+</span> <span class="mi">1</span><span class="o">);</span>  <span class="c1">// key not found</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>我们来测试一下。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;&gt;();</span>
+<span class="n">list1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"沉"</span><span class="o">);</span>
+<span class="n">list1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"默"</span><span class="o">);</span>
+<span class="n">list1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"王"</span><span class="o">);</span>
+<span class="n">list1</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"二"</span><span class="o">);</span>
+
+<span class="nc">Collections</span><span class="o">.</span><span class="na">sort</span><span class="o">(</span><span class="n">list1</span><span class="o">);</span> <span class="c1">// 先要排序</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Collections</span><span class="o">.</span><span class="na">binarySearch</span><span class="o">(</span><span class="n">list1</span><span class="o">,</span> <span class="s">"王"</span><span class="o">));</span> <span class="c1">// 2</span>
+</code></pre></div></div>
+
+<h3 id="05故事的未完待续">05、故事的未完待续</h3>
+
+<p>“二哥，终于讲完《集合》了，喝口咖啡吧！”三妹的态度很体贴。</p>
+
+<p>“谢谢。”</p>
+
+<p>“二哥，如果这篇文章继续遭受到批评，你会不会气馁啊？”三妹眨了眨眼睛，继续问我，我看到她长长的睫毛，真的很美。</p>
+
+<p>“嗯，对于作者来说，当然希望文章能够得到正面的反馈，如果是负面的反馈，那也在我的意料之中。”</p>
+
+<p>“为啥？”三妹很好奇。</p>
+
+<p>“《教妹学 Java》是一种创新的写作手法，市面上还没有，新鲜、有趣的事物总需要一段时间才能被大众接受，否则也就不叫创新了。”</p>
+
+<p>“二哥，为你的勇气点赞！”看到三妹很为我骄傲的样子，我的心里盛开了一朵牡丹花。</p>
+
+<p>上一篇：<a href="http://www.itwanger.com/java/2019/11/14/java-fanxing.html">教妹学 Java：晦涩难懂的泛型</a></p>
+
+<p>下一篇：<a href="http://www.itwanger.com/java/2019/11/14/java-duoxiancheng.html">教妹学 Java：难以驾驭的多线程</a></p>
+
+<p>谢谢大家的阅读，原创不易，喜欢就随手点个赞👍，这将是我最强的写作动力。如果觉得文章对你有点帮助，还挺有趣，就关注一下我的公众号「<strong>沉默王二</strong>」。</p>
+:ET

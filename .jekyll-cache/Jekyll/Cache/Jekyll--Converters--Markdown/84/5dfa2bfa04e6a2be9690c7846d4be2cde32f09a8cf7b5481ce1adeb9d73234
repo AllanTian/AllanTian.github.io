@@ -1,0 +1,184 @@
+I"�B<p>开门见山地说吧，Java 提供了一套完整的集合类（也可以叫做容器类）来管理一组长度可变的对象（也就是集合的元素），其中常见的类型包括 List、Set、Queue 和 Map。从我个人的编程经验来看，List 的实现类 ArrayList 和 Map 的实现类 HashMap 使用频率最高，其它实现类只能望其项背了。</p>
+
+<!--more-->
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-jihe-rumen-1.png" alt="" /></p>
+
+<p>List、Set 和 Queue 都是 Collection 的子接口，但各有各的好。List 按照插入的顺序保存元素，Set 不会有重复的元素，Queue 通常（但并非一定）以 FIFO（先进先出）的方式排序各个元素。</p>
+
+<p>Map 与 Collection 最大的不同就在于，它是一组“键值对”，可以快速地通过键来查找值；Collection 是没有键的，因此需要按照某种规则来查找值（这里说的值就是元素）。</p>
+
+<p>怎么使用集合类呢？示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Wanger</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;();</span>
+		<span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="s">"李孝利"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">));</span>
+
+		<span class="nc">Map</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;</span> <span class="n">map</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashMap</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">,</span> <span class="nc">String</span><span class="o">&gt;();</span>
+		<span class="n">map</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">"lixiaoli"</span><span class="o">,</span> <span class="s">"李孝利"</span><span class="o">);</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">map</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">"lixiaoli"</span><span class="o">));</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="01arraylist-和-linkedlist">01、ArrayList 和 LinkedList</h3>
+
+<p>通常情况下，ArrayList 是我们在选择 List 的时候的首选。别问我为什么，就好像你问我为什么 1＋1 = 2 ？我回答不上来啊。</p>
+
+<p>有人会问，如果我的应用操作偏向于插入和删除，而不是随机访问，我还要选用 ArrayList 吗？我知道 LinkedList 在处理插入和删除的时候更高效，而 ArrayList 更适合随机访问。</p>
+
+<p>那么我的回答是，你已经知道了答案，就做出自己的选择吧。</p>
+
+<p>List 的应用经常会涉及到一些经典的排序算法，我们不妨来重温一下冒泡排序，冒泡排序的规则是：假如有 N 个数，是无序的；从第一个数开始和后面 N-1 的数比较，发现有比自己小的就交换位置；从第二个数开始和后面 N-2 的数比较，同样发现有比自己小的就交换位置；直到 N-1 结束。</p>
+
+<p>来看程序清单1-1：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">BubbleSort</span> <span class="o">{</span>
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		<span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;();</span>
+		<span class="nc">Collections</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">5</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="mi">9</span><span class="o">,</span> <span class="mi">8</span><span class="o">,</span> <span class="mi">6</span><span class="o">,</span> <span class="mi">7</span><span class="o">,</span> <span class="mi">10</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">3</span><span class="o">);</span>
+
+		<span class="c1">// 从第1个数开始比较，直到N-1</span>
+		<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+			<span class="c1">// 从第i+1开始，和i位置的数进行比较</span>
+			<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="o">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">j</span><span class="o">++)</span> <span class="o">{</span>
+				<span class="c1">// 记录原来的数</span>
+				<span class="kt">int</span> <span class="n">temp</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">j</span><span class="o">);</span>
+
+				<span class="c1">// 如果i位置的数大，就和j位置的数进行交换</span>
+				<span class="k">if</span> <span class="o">(</span><span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">)</span> <span class="o">&gt;</span> <span class="n">temp</span><span class="o">)</span> <span class="o">{</span>
+					<span class="n">list</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">j</span><span class="o">,</span> <span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">i</span><span class="o">));</span>
+					<span class="n">list</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="n">i</span><span class="o">,</span> <span class="n">temp</span><span class="o">);</span>
+				<span class="o">}</span>
+			<span class="o">}</span>
+		<span class="o">}</span>
+		
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>Collections 类是操作 Collection 的一个工具集，提供了很多可以操作和返回 Collection 的静态方法，非常好用。<code class="highlighter-rouge">Collections.addAll()</code> 方法可以将所有指定元素添加到指定 Collection 中，可以分别指定要添加的元素，就像 <code class="highlighter-rouge">Collections.addAll(list, 2, 1, 5);</code> 这样；或者将要添加的元素指定为一个数组；此方法的行为与 <code class="highlighter-rouge">list.addAll(Arrays.asList(elements))</code> 的行为是相同的，但在大多数实现下，此方法运行起来可能要快得多。</p>
+
+<p><code class="highlighter-rouge">list.set(int index,  E element)</code> 用于指定元素替代此列表中指定位置上的元素，非常便捷。</p>
+
+<h3 id="02hashmap">02、HashMap</h3>
+
+<p>HashMap 是最常见的 Map 实现，应用非常的广泛；支持 null 键和 null 值，是绝大部分利用键值对存取场景的首选；比如，查询数据库的时候经常使用 HashMap 来进行灵活的（可选择一个表的部分列，而不是所有列）列名和列值的绑定。</p>
+
+<p>HashMap 的值中还可以存放新的键值对，就像下面的这张示意图。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/11/java-jihe-rumen-2.png" alt="" /></p>
+
+<h3 id="03priorityqueue">03、PriorityQueue</h3>
+
+<p>考虑这样一种场景，王二现在是一个写作大咖了，不再只是一个会写代码的程序员了。有一天，他和几个热情的读者相遇在厕所的门口，为了表示对王二的尊重，读者们觉得礼让王二先去解决问题是必要的。</p>
+
+<p>PriorityQueue 是一种优先级队列（Priority 即为优先的意思），可以应用于这种场景。代码示例如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">WriterAndReader</span> <span class="kd">implements</span> <span class="nc">Comparable</span><span class="o">&lt;</span><span class="nc">WriterAndReader</span><span class="o">&gt;</span> <span class="o">{</span>
+	<span class="kd">static</span> <span class="nc">PriorityQueue</span><span class="o">&lt;</span><span class="nc">WriterAndReader</span><span class="o">&gt;</span> <span class="n">queue</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">PriorityQueue</span><span class="o">&lt;</span><span class="nc">WriterAndReader</span><span class="o">&gt;();</span>
+
+	<span class="kd">private</span> <span class="nc">String</span> <span class="n">name</span><span class="o">;</span>
+
+	<span class="kd">public</span> <span class="nf">WriterAndReader</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">int</span> <span class="nf">compareTo</span><span class="o">(</span><span class="nc">WriterAndReader</span> <span class="n">o</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// o为之前的</span>
+		<span class="k">if</span> <span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="s">"王二"</span><span class="o">))</span> <span class="o">{</span>
+			<span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">o</span><span class="o">.</span><span class="na">getName</span><span class="o">());</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">setName</span><span class="o">(</span><span class="nc">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+		<span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">toString</span><span class="o">()</span> <span class="o">{</span>
+		<span class="k">return</span> <span class="k">this</span><span class="o">.</span><span class="na">getName</span><span class="o">();</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+		
+		<span class="c1">// 第一次，没有发生比较，因为只有一个</span>
+		<span class="n">queue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">WriterAndReader</span><span class="o">(</span><span class="s">"读者2"</span><span class="o">));</span>
+		<span class="c1">// 第二次，与第一次放入的比较，发现读者1比读者2小</span>
+		<span class="n">queue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">WriterAndReader</span><span class="o">(</span><span class="s">"读者1"</span><span class="o">));</span>
+		<span class="c1">// 第三次，与读者1进行比较，发现王二小；</span>
+		<span class="n">queue</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="k">new</span> <span class="nc">WriterAndReader</span><span class="o">(</span><span class="s">"王二"</span><span class="o">));</span>
+		
+		<span class="k">while</span> <span class="o">(!</span><span class="n">queue</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">())</span> <span class="o">{</span>
+			<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">queue</span><span class="o">.</span><span class="na">poll</span><span class="o">());</span>
+		<span class="o">}</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>PriorityQueue 既然要排出优先级，那么就要有一定的规则，排列的对象就要实现 Comparable 接口。</p>
+
+<p>建议在学习的时候 debug 一下，你会发现 queue 的变化非常的有意思；每次 add 添加或者 poll 取出时就会执行对应的 compareTo。</p>
+
+<p>PriorityQueue 常用的功能函数如下：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>方法名</th>
+      <th>功能描述</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>add(E e)</td>
+      <td>添加元素</td>
+    </tr>
+    <tr>
+      <td>clear()</td>
+      <td>清空</td>
+    </tr>
+    <tr>
+      <td>contains(Object o)</td>
+      <td>检查是否包含当前参数元素</td>
+    </tr>
+    <tr>
+      <td>offer(E e)</td>
+      <td>添加元素</td>
+    </tr>
+    <tr>
+      <td>peek()</td>
+      <td>读取元素，（不删除）</td>
+    </tr>
+    <tr>
+      <td>poll()</td>
+      <td>取出元素，（删除）</td>
+    </tr>
+    <tr>
+      <td>remove(Object o)</td>
+      <td>删除指定元素</td>
+    </tr>
+    <tr>
+      <td>size()</td>
+      <td>返回长度</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<p>上一篇：<a href="http://www.itwanger.com/java/2019/11/08/java-array.html">Java 数组，看这篇就够了</a></p>
+
+<p>下一篇：<a href="http://www.itwanger.com/java/2019/11/08/java-hashmap.html">HashMap，难的不在Map，而在Hash</a></p>
+
+<p>微信搜索「<strong>沉默王二</strong>」公众号，关注后回复「<strong>免费视频</strong>」获取 500G 高质量教学视频（<a href="https://mp.weixin.qq.com/s/GjkEyPW0vgIvuDLYQkBM0A">已分门别类</a>）。</p>
+:ET

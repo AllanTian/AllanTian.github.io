@@ -1,0 +1,2 @@
+I"�<p>偶尔，我们需要在 Lambda 表达式中修改变量的值，但如果直接尝试修改的话，编译器不会视而不见听而不闻，它会警告我们说：“variable used in lambda expression should be final or effectively final”。</p>
+:ET

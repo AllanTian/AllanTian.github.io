@@ -1,0 +1,192 @@
+I"�S<p>和绝大多数的程序员一样，我也非常的宅。周末最奢侈的享受就是逛一逛技术型网站，比如说 programcreek，这个小网站上有一些非常有意思的主题。比如说：Java 程序员最常犯的错竟然是这 10 个，像这类令人好奇心想害死猫的主题，非常值得扒出来给大家分享一下。</p>
+
+<!--more-->
+
+<p><img src="http://www.itwanger.com/assets/images/2020/01/java-top10-mistake-02.png" alt="" /></p>
+
+<p>PS：别问<a href="https://mp.weixin.qq.com/s/feoOINGSyivBO8Z1gaQVOA">我</a>“为什么标题要加上‘惊呆了’？”问了答案就只有一个——吓唬人——总得勾起大家的阅读兴趣嘛（我容易吗我）。</p>
+
+<h3 id="01把-array-转成-arraylist">01、把 Array 转成 ArrayList</h3>
+
+<p>说实在的，很多 Java 程序员喜欢把 Array 转成 ArrayList：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">arr</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>但实际上，<code class="highlighter-rouge">Arrays.asList()</code> 返回的 ArrayList 并不是 <code class="highlighter-rouge">java.util.ArrayList</code>，而是 Arrays 的内部私有类 <code class="highlighter-rouge">java.util.Arrays.ArrayList</code>。虽然名字完全相同，都是 <code class="highlighter-rouge">ArrayList</code>，但两个类有着很大的不同。<code class="highlighter-rouge">Arrays.ArrayList</code> 虽然有 <code class="highlighter-rouge">set()</code>、<code class="highlighter-rouge">get()</code> 和 <code class="highlighter-rouge">contains()</code> 等方法，但却没有一个方法用来添加元素，因此它的大小是固定的。</p>
+
+<p>如果想创建一个真正的 <code class="highlighter-rouge">ArrayList</code>，需要这样做：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">arr</span><span class="o">));</span>
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">ArrayList</code> 的构造方法可以接收一个 Collection 类型的参数，而 <code class="highlighter-rouge">Arrays.ArrayList</code> 是其子类，所以可以这样转化。</p>
+
+<h3 id="02通过-set-检查数组中是否包含某个值">02、通过 Set 检查数组中是否包含某个值</h3>
+
+<p>之前我在写一篇文章《<a href="https://mp.weixin.qq.com/s/DBvgghP5cN6KlPnILaqjmQ">如何检查Java数组中是否包含某个值 </a>》中曾提到一种方法：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Set</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">set</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">HashSet</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">arr</span><span class="o">));</span>
+<span class="k">return</span> <span class="n">set</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">targetValue</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>这种方法确实可行，但却忽视了性能问题；为了能够尽快完成检查，可以这样做：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">arr</span><span class="o">).</span><span class="na">contains</span><span class="o">(</span><span class="n">targetValue</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>或者使用普通的 for 循环或者 for-each。</p>
+
+<h3 id="03通过-for-循环删除列表中的元素">03、通过 for 循环删除列表中的元素</h3>
+
+<p>新手特列喜欢使用 for 循环删除列表中的元素，就像这样：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;(</span><span class="nc">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="s">"沉"</span><span class="o">,</span> <span class="s">"默"</span><span class="o">,</span> <span class="s">"王"</span><span class="o">,</span> <span class="s">"二"</span><span class="o">));</span>
+<span class="k">for</span> <span class="o">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">list</span><span class="o">.</span><span class="na">size</span><span class="o">();</span> <span class="n">i</span><span class="o">++)</span> <span class="o">{</span>
+    <span class="n">list</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">i</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>上面这段代码的目的是把列表中的元素全部删除，但结果呢：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">默</span><span class="o">,</span> <span class="n">二</span><span class="o">]</span>
+</code></pre></div></div>
+
+<p>竟然还有两个元素没删除，why？</p>
+
+<p>当 List 的元素被删除时，其 <code class="highlighter-rouge">size()</code> 会减小，元素的下标也会改变，所以想通过 for 循环删除元素是行不通的。</p>
+
+<p>那 for-each 呢？</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">for</span><span class="o">(</span><span class="nc">String</span> <span class="n">s</span> <span class="o">:</span> <span class="n">list</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">if</span> <span class="o">(</span><span class="s">"沉"</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">s</span><span class="o">))</span> <span class="o">{</span>
+       <span class="n">list</span><span class="o">.</span><span class="na">remove</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>竟然还抛出异常了：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Exception</span> <span class="n">in</span> <span class="n">thread</span> <span class="s">"main"</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">ConcurrentModificationException</span>
+	<span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">ArrayList</span><span class="n">$Itr</span><span class="o">.</span><span class="na">checkForComodification</span><span class="o">(</span><span class="nc">ArrayList</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">909</span><span class="o">)</span>
+	<span class="n">at</span> <span class="n">java</span><span class="o">.</span><span class="na">util</span><span class="o">.</span><span class="na">ArrayList</span><span class="n">$Itr</span><span class="o">.</span><span class="na">next</span><span class="o">(</span><span class="nc">ArrayList</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">859</span><span class="o">)</span>
+	<span class="n">at</span> <span class="n">com</span><span class="o">.</span><span class="na">cmower</span><span class="o">.</span><span class="na">java_demo</span><span class="o">.</span><span class="na">programcreek</span><span class="o">.</span><span class="na">Top10Mistake</span><span class="o">.</span><span class="na">main</span><span class="o">(</span><span class="nc">Top10Mistake</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">15</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>抛出异常的原因，可以查看我之前写的文章《<a href="http://www.itwanger.com/java/2019/11/22/java-fail-fast.html">Java，你告诉我 fail-fast 是什么鬼？</a>》。</p>
+
+<p>有经验的程序员应该已经知道答案了，使用 Iterator：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Iterator</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">iterator</span><span class="o">();</span>
+<span class="k">while</span> <span class="o">(</span><span class="n">iter</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+    <span class="nc">String</span> <span class="n">s</span> <span class="o">=</span> <span class="n">iter</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+
+    <span class="k">if</span> <span class="o">(</span><span class="n">s</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">"沉"</span><span class="o">))</span> <span class="o">{</span>
+        <span class="n">iter</span><span class="o">.</span><span class="na">remove</span><span class="o">();</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+
+<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">list</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>程序输出的结果如下：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span><span class="n">默</span><span class="o">,</span> <span class="n">王</span><span class="o">,</span> <span class="n">二</span><span class="o">]</span>
+</code></pre></div></div>
+
+<h3 id="04使用-hashtable-而不是-hashmap">04、使用 Hashtable 而不是 HashMap</h3>
+
+<p>通常来说，哈希表应该是 Hashtable，但在 Java 中，哈希表通常指的是 HashMap。两者之间的区别之一是 Hashtable 是线程安全的。如果没有特殊要求的话，哈希表应该使用 HashMap 而不是 Hashtable。</p>
+
+<h3 id="05使用原始类型">05、使用原始类型</h3>
+
+<p>在 Java 中，新手很容易混淆无限通配符和原始类型之间的差别。举例来说，<code class="highlighter-rouge">List&lt;?&gt; list</code> 为无限通配符，<code class="highlighter-rouge">List list</code> 为原始类型。</p>
+
+<p>来看下面这段代码：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">add</span><span class="o">(</span><span class="nc">List</span> <span class="n">list</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">o</span><span class="o">){</span>
+    <span class="n">list</span><span class="o">.</span><span class="na">add</span><span class="o">(</span><span class="n">o</span><span class="o">);</span>
+<span class="o">}</span>
+<span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">){</span>
+    <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">list</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;();</span>
+    <span class="n">add</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="mi">18</span><span class="o">);</span>
+    <span class="n">add</span><span class="o">(</span><span class="n">list</span><span class="o">,</span> <span class="s">"沉默王二"</span><span class="o">);</span>
+    <span class="nc">String</span> <span class="n">s</span> <span class="o">=</span> <span class="n">list</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>这段代码在运行时会抛出异常：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">Exception</span> <span class="n">in</span> <span class="n">thread</span> <span class="s">"main"</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">ClassCastException</span><span class="o">:</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">Integer</span> <span class="n">cannot</span> <span class="n">be</span> <span class="n">cast</span> <span class="n">to</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">String</span>
+	<span class="n">at</span> <span class="n">com</span><span class="o">.</span><span class="na">cmower</span><span class="o">.</span><span class="na">java_demo</span><span class="o">.</span><span class="na">programcreek</span><span class="o">.</span><span class="na">Top10Mistake</span><span class="o">.</span><span class="na">main</span><span class="o">(</span><span class="nc">Top10Mistake</span><span class="o">.</span><span class="na">java</span><span class="o">:</span><span class="mi">38</span><span class="o">)</span>
+</code></pre></div></div>
+
+<p>使用原始类型非常的危险，因为跳过了泛型的检查。至于 <code class="highlighter-rouge">List&lt;Object&gt;</code> 和 <code class="highlighter-rouge">List</code> 之间的区别，查看我写的另外一篇文章：《<a href="http://www.itwanger.com/java/2019/12/19/java-raw-type.html">为什么不应该使用Java的原始类型</a>》。</p>
+
+<h3 id="06使用-public-修饰字段">06、使用 public 修饰字段</h3>
+
+<p>有些新手喜欢使用 public 修饰字段，因为不需要 <code class="highlighter-rouge">getter/setter</code> 方法就可以访问字段。但实际上，这是一个非常糟糕的设计；有经验的程序员更习惯于提供尽可能低的访问级别。</p>
+
+<h3 id="07使用-arraylist-而不是-linkedlist">07、使用 ArrayList 而不是 LinkedList</h3>
+
+<p>新手往往搞不清楚 ArrayList 和 LinkedList 之间的区别，因此更倾向于使用 ArrayList，因为比较面熟。但是呢，它们之间存在巨大的性能差异。简单的说吧，如果“添加/删除”的操作比较多，而“获取”的操作比较少，则应该首选 LinkedList。</p>
+
+<h3 id="08使用过多的不可变对象">08、使用过多的不可变对象</h3>
+
+<p>不可变对象有着不少的优点，比如说简单性和安全性。但是呢，如你所料，它也有一些难以抗拒的弊端：对于每一个不同的值，它都需要一个单独的对象来表示，这样的对象太多的话，很可能会导致大量的垃圾，回收的成本就变得特别高。</p>
+
+<p>为了在可变与不可变之间保持平衡，通常会使用可变对象来避免产生太多中间对象。一个经典的例子就是使用 StringBuilder（可变对象） 来连接大量的字符串，否则的话，String（不可变对象）会产生很多要回收的垃圾。</p>
+
+<p>反例：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">result</span><span class="o">=</span><span class="s">""</span><span class="o">;</span>
+<span class="k">for</span><span class="o">(</span><span class="nc">String</span> <span class="nl">s:</span> <span class="n">arr</span><span class="o">){</span>
+	<span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">+</span> <span class="n">s</span><span class="o">;</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>正例：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">StringBuilder</span> <span class="n">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">StringBuilder</span><span class="o">();</span>
+<span class="k">for</span> <span class="o">(</span><span class="nc">String</span> <span class="nl">s:</span> <span class="n">strs</span><span class="o">)</span> <span class="o">{</span>
+	<span class="n">result</span><span class="o">.</span><span class="na">append</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<p>参考文章：<a href="https://mp.weixin.qq.com/s/CRQrm5zGpqWxYL_ztk-b2Q">为什么 Java 字符串是不可变的？</a></p>
+
+<h3 id="09父类没有默认的无参构造方法">09、父类没有默认的无参构造方法</h3>
+
+<p>在 Java 中，如果父类没有定义构造方法，则编译器会默认插入一个无参的构造方法；但如果在父类中定义了构造方法，则编译器不会再插入无参构造方法。所以下面的代码会在编译时出错。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2020/01/java-top10-mistake-03.png" alt="" /></p>
+
+<p>子类中的无参构造方法试图调用父类的无参构造方法，但父类中并未定义，因此编译出错了。解决方案就是在父类中定义无参构造方法。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2020/01/java-top10-mistake-04.png" alt="" /></p>
+
+<h3 id="10使用构造方法创建字符串">10、使用构造方法创建字符串</h3>
+
+<p>创建字符串有两种方法：</p>
+
+<p>1）使用双引号</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">er</span> <span class="o">=</span> <span class="s">"沉默王二"</span><span class="o">;</span>
+</code></pre></div></div>
+
+<p>2）使用构造方法</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">String</span> <span class="n">san</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">String</span><span class="o">(</span><span class="s">"沉默王三"</span><span class="o">);</span>
+</code></pre></div></div>
+
+<p>但是它们之间有着很大的不同（可以参照<a href="http://www.itwanger.com/java/2019/11/28/java-string-shuangyinhao-gouzaohanshu.html">创建 Java 字符串，用”“还是构造函数</a>），双引号被称为字符串常量，可以避免重复内容的字符串在内存中创建。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2020/01/java-top10-mistake-05.png" alt="" /></p>
+
+<p>好了，读者朋友们，以上就是本文的全部内容了。可以掏心窝子地说，没有任何客观的数据来证明它们就是前十名，但绝对非常普遍。如果不认可其中的内容，请在留言区轻喷，好人有好报。如果觉得不过瘾，还想看到更多，可以 star 二哥的 GitHub【<a href="https://github.com/qinggee/itwanger.github.io">itwanger.github.io</a>】，本文已收录。</p>
+
+<p><strong>原创不易，如果觉得有点用的话，请不要吝啬你手中点赞的权力</strong>——这将是我最强的写作动力。</p>
+:ET

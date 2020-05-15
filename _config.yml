@@ -6,19 +6,19 @@
 # 'jekyll serve'. If you change this file, please restart the server process.
 
 # Site settings
-title:  沉默王二
-subtitle: 公号「沉默王二」，一枚有趣的程序员
-name: 沉默王二 
-email: 983436076@qq.com
-description: 本站为沉默王二的技术分享博客。内容涵盖Java后端技术、Web前端等相关知识分享，还有有趣的程序人生等着你。
-keywords: 沉默王二,Java,Java教程,程序人生,程序员,前端,Web,全栈
+title:  超Ren专属
+subtitle: 现在的你可以免费的 —— 探索我们共同的秘密！
+name: AllanTian 
+email: 1067829356@qq.com
+description: 本站为超Ren专属的技术分享博客。内容涵盖Java后端技术、Web前端等相关知识分享，还有更多的共同的秘密等着我们一起去探索！
+keywords: AllanTian,Java,Java教程,程序人生,程序员,前端,Web,全栈
 encoding: "utf-8"
 favicon: favicon.ico 
 
-repository: qinggee/itwanger.github.io
-github_url: https://github.com/qinggee
-url: http://www.itwanger.com
-enforce_ssl: itwanger.com
+repository: AllanTian/allantian.github.io
+github_url: https://github.com/AllanTian
+url: http://www.allantian.com/
+enforce_ssl: allantian.com
 
 ## Gem
 plugins:
@@ -49,7 +49,7 @@ syntax_highlighter_opts:
    coderay_line_numbers:  nil
 
 # Pagination
-paginate: 12
+paginate: 10
 paginate_path: 'page:num'
 
 # Navigation. top menu list

@@ -1,0 +1,27 @@
+I"�<p>Enhanced Class Decompiler 的中文直译就是“增强的字节码反编译工具”，下文简称为 ECD。</p>
+
+<p>ECD 将 <code class="highlighter-rouge">JD</code>、<code class="highlighter-rouge">Jad</code>、<code class="highlighter-rouge">FernFlow</code>、<code class="highlighter-rouge">CFR</code>、<code class="highlighter-rouge">Procyon</code> 与 <code class="highlighter-rouge">Eclipse</code> 无缝集成，并且允许 Java 开发人员直接调试类文件而不需要源代码。这还不算完啊，它还集成了 Eclipse 类编辑器 M2E 插件，支持 Javadoc、参考搜索、库源附加、字节码视图和 <code class="highlighter-rouge">JDK 8 lambda</code> 表达式的语法。</p>
+
+<!--more-->
+
+<h3 id="01安装-ecd">01、安装 ECD</h3>
+
+<p>第一步，在 <code class="highlighter-rouge">Eclipse Marketplace</code> 搜索 jad。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/10/eclipse-ecd-1.png" alt="" /></p>
+
+<p>第二步，点击「Installed」按钮进行安装。安装完成后重启 Eclipse。</p>
+
+<h3 id="02使用-ecd">02、使用 ECD</h3>
+
+<p>设置 ECD 为默认的 class 打开方式，配置→通用→Editors→File Assoclations→*.class→Class Decompiler Viewer，如下图所示。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/10/eclipse-ecd-2.png" alt="" /></p>
+
+<p>当我们查看 Java 源代码的时候就看到解析工具发生了变化，如下图所示。</p>
+
+<p><img src="http://www.itwanger.com/assets/images/2019/10/eclipse-ecd-3.png" alt="" /></p>
+
+<p>原文链接：<a href="http://www.itwanger.com/java/2019/10/22/eclipse-ecd.html">http://www.itwanger.com/java/2019/10/22/eclipse-ecd.html</a></p>
+
+:ET

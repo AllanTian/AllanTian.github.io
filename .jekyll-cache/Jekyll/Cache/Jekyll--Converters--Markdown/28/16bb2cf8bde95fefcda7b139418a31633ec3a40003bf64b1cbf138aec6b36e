@@ -1,0 +1,2 @@
+I"b<p><code class="highlighter-rouge">java.net.URL</code> 类将 URL 地址进行了封装，并提供了解析 URL 地址的基本方法，比如获取 URL 的主机名和端口号。<code class="highlighter-rouge">java.net.URLConnection</code> 则代表了应用程序和 URL 之间的通信链接，可用于读取和写入此 URL 引用的资源。</p>
+:ET
