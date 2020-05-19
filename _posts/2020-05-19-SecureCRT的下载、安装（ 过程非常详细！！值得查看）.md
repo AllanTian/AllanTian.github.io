@@ -2,13 +2,13 @@
 layout: post
 category: life
 title: SecureCRT的下载、安装（ 过程非常详细！！值得查看）
-tagline: by 沉默王二
+tagline: by AllanTian
 tags: 
   - 程序员
 ---
 
 
-@[TOC](SecureCRT的下载、安装（ 过程非常详细！！值得查看）)
+
 
 # 简单介绍下SecureCRT
 
@@ -55,4 +55,4 @@ SecureCRT正版是要收费, 我是从官网站上下载到的SecureCRT的安装
  - 这时候桌面会显示两个图标，证明安装已经完成。
  ![在这里插入图片描述](https://img-blog.csdnimg.cn/20190912174343597.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM5MDUyNTEz,size_16,color_FFFFFF,t_70)
  ***这下大家就可以尽情的使用SercureCRT和SercureFx这两个软件了。谢谢！
-  第一次在CSDN上写文章，心里还是很鸡冻?***
+  
