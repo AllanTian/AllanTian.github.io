@@ -1,0 +1,211 @@
+# FastJson 
+
+## 引言
+
+身为后台开发，那日常跟前端交互那是不可避免的，那时常卖弄 JSON 数据那更是必不可缺的，今天小玉遇到了一个头疼的问题，当从前台接收json封装的list数据，在后台接收时控制台一直报错，看的小玉那可是头皮发麻，不知如何是好，怎么解决都没法解决，就想起他甜哥我啊，百事通啊，那可是名不虚传，立马就帮她找到了主题所在，嗖嗖嗖就解决了，来记录一下，以免小伙伴们下次碰到了绞尽脑汁！看甜哥，多有先见之明。
+
+详细的问题，下文一看便知！
+
+quick 😉
+
+
+## 问题
+
+
+具体问题是这样的
+
+> java.lang.ClassCastException: com.alibaba.fastjson.JSONObject cannot be cast to com.atian.bean.Student
+
+
+翻译过来就是 `com.alibaba.fastjson.JSONObject无法转换为com.tian.bean.Student` 
+
+其实就是在小玉接受到 前台的json 数据转为 Student 对象的时候无法转换。当时小玉的代码我就我没要，我写一个小小的示例，让小伙伴们看下接受到的是什么样的 json 数据。
+
+## 示例
+
+实体类  `Student类`
+
+
+```java
+public class Student {
+
+    private  Integer id; // ID
+
+    List<String> classNums;  //班级个数
+
+    //set get方法
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public List<String> getClassNums() {
+        return classNums;
+    }
+
+    public void setClassNums(List<String> classNums) {
+        this.classNums = classNums;
+    }
+    
+}
+```
+
+测试类 `Test类` 只是简单测试写一个简单的数据
+
+
+
+```java
+public class Test {
+
+    public static void main(String[] args) {
+
+        List<String> classNums1 = new ArrayList<String>();
+        classNums1.add("一班");
+        classNums1.add("三班");
+
+        Student student1 = new Student();
+        student1.setId(1);
+        student1.setClassNums(classNums1);
+
+
+
+        List<String> classNums2 = new ArrayList<String>();
+        classNums2.add("六班");
+        classNums2.add("八班");
+
+        Student student2 = new Student();
+        student2.setId(2);
+        student2.setClassNums(classNums2);
+
+
+
+        List<Student> studentList = new ArrayList<Student>();
+        studentList.add(student1);
+        studentList.add(student2);
+
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("count", 2);
+        map.put("studentList", studentList);
+        String json = JSON.toJSONString(map, true);
+
+        System.out.println(json);
+    }
+}
+```
+
+`JSON 数据`
+
+
+```json
+{
+    "count":2,
+    "studentList":[
+        {
+            "classNums":[
+                "一班",
+                "三班"
+            ],
+            "id":1
+        },
+        {
+            "classNums":[
+                "六班",
+                "八班"
+            ],
+            "id":2
+        }
+    ]
+}
+```
+
+*可以明确的看见，这个 **json** 字符串内有一个内置的 **List***
+
+而当时小玉是获取到这个 json 数据后是下文这样解析的。
+
+
+```java
+
+    HashMap hashMap = JSON.parseObject(json, HashMap.class);
+    List<Student> students = (List<Student>) hashMap.get("studentList");
+    for (Student student : students) { // Exception
+        System.out.println(student.getId() + " ");
+    }
+  
+```
+
+
+执行过程中就会出现出现java.lang.ClassCastException: com.alibaba.fastjson.JSONObject cannot be cast to com.atian.bean.Student 此异常:
+
+错误信息
+
+```java
+Exception in thread "main" java.lang.ClassCastException: com.alibaba.fastjson.JSONObject cannot be cast to com.atian.bean.Student
+	    at com.atian.bean.Test.main(Test.java:55)
+```
+
+
+## 解决办法
+
+经过我使用 **debug**发现，其实那是一个 JsonObject 看下图可一探究竟。
+
+
+所以说使用小玉这种解析方式是无法解析的，应使用正确的方法解析 json内含 *List*
+
+### 正确方法
+
+
+```java
+    //此行代码为正确解析方法，仅此一行便可以
+    List<Student> students = JSON.parseArray(JSON.parseObject(json).getString("studentList"), Student.class);
+
+```
+
+正确的方法解析遍历List集合的代码及结果
+
+##### 代码
+
+```java
+    //以下为遍历演示获取到的List数据，无须在意
+    for (Student student : students) { // Exception
+        System.out.println(" ID 为 ："  + student.getId() );
+        System.out.println(" 班级num 为 ："  + student.getClassNums() );
+    }
+```
+
+##### 结果
+
+```java
+ ID 为 ：1
+ 班级num 为 ：[一班, 三班]
+ ID 为 ：2
+ 班级num 为 ：[六班, 八班]
+```
+
+## 总结
+
+听闻阿里的 **FastJson** 使用特别的算法，速度非常快，甚至快过 *Google* 的 protobuf，所以选择使用 FastJson 来做 Json 的处理，人家虽强，很快，但我们自己使用的过程中还是难免会遇到一些未知的问题、bug ，莫要灰心，坚持下去，解决问题，你就会发现不亏是真的快，别怕，你还有我，有问题找甜哥，奥力给，还有更多的秘密等着你来探索！
+
+
+
+分享嗨起来，在看点起来，美德传起来，点个星标从此探索之路不迷茫！
+
+
+*PS* ：若有些小伙伴们无法使用阿里的FastJson，可在 **pom.xml** 导入依赖：
+
+
+```xml
+    <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>fastjson</artifactId>
+        <version>1.2.62</version>
+    </dependency>
+```
+
+
+
+
+

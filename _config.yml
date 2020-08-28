@@ -7,7 +7,7 @@
 
 # Site settings
 title:  超Ren专属
-subtitle: 现在的你可以免费的 —— 探索我们共同的秘密！
+subtitle: 共同探索程序的秘密！
 name: AllanTian 
 email: 1067829356@qq.com
 description: 本站为超Ren专属的技术分享博客。内容涵盖Java后端技术、Web前端等相关知识分享，还有更多的共同的秘密等着我们一起去探索！
@@ -78,6 +78,13 @@ navs:
     href: /java.html
     label: Java
     target: _self
+    
+    
+  -
+    href: /linux.html
+    label: Linux
+    target: _self
+  
 
   -
     href: /web.html
@@ -161,19 +168,19 @@ comments_provider: gitalk
 # !!!Important!!! Please modify infos below to yours
 # https://disqus.com
 disqus:
-    username: qing_gee
+    username: AllanTian
 # https://imsun.net/posts/gitment-introduction/
 gitment:
-    owner: qinggee
+    owner: AllanTian
     repo: blog-comments
     oauth:
-        client_id: 11a6f252374ff6224761
-        client_secret: 3d1722301d3eb67900cfc3828d137c9ea50c00a7
+        client_id: db18c2f898eca4e19908
+        client_secret: ad9260f672a9bf7f7aa2f4c752d52c8be39288a8
 # https://github.com/gitalk/gitalk#install
 gitalk:
-    owner: qinggee
+    owner: AllanTian
     repo: blog-comments
-    clientID: 11a6f252374ff6224761
-    clientSecret: 3d1722301d3eb67900cfc3828d137c9ea50c00a7
+    clientID: db18c2f898eca4e19908
+    clientSecret: ad9260f672a9bf7f7aa2f4c752d52c8be39288a8
 # 在使用其它评论组件时可点击显示 Disqus
 lazy_load_disqus : true

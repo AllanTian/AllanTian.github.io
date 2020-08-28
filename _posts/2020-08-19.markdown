@@ -1,0 +1,274 @@
+# Java能实现键盘数据的录入嘛？
+
+## 引言
+
+今天给大家来说一个特别有趣的知识，我们日常中肯定会碰到一些输入数据的地方，比如浏览器上的输入框，微信、QQ 聊天时文字的输入等等都是用键盘去录入的数据。那在当我们运行Java的时候可以用键盘去录入一些自己想输入的数据嘛？
+
+毫无疑问，那必须可以！想知道如何录入嘛，接下来我就带大家看看Java是如何实现键盘数据的录入的！
+
+瞧好咯😎学会了，让你的程序活灵活现！
+
+
+## 概述
+
+首先我们先`简单`的`了解`下，到底什么是`键盘录入`！
+
+
+### 键盘录入
+
+`键盘录入`就是在`程序运行的过程中，可以让用户录入一些数据，存储在内存的变量中，在后续的程序运行过程中，可以使用这些数据`。
+
+这下是不是更清楚了，原来键盘录入的数据是会被存储在内存中的，而`Java`是`通过 Scanner 类`来`获取用户的输入`，`java.util.Scanner` 是 `Java5 的新特征`。
+
+### 语法
+
+下面是`Java` `创建 Scanner 对象`的`基本语法`
+
+
+```java
+Scanner scanner = new Scanner(System.in);
+```
+
+
+## 如何实现
+
+下面我们说下Java想要实现键盘录入都有那些步骤
+
+1. **第一步**
+
+   `导包`，在`类声明的上面`，输写 *`import java.util.Scanner`*;
+
+
+2. **第二步**
+
+   `创建键盘录入对象`，*`Scanner scanner = new Scanner(System.in)`*;
+
+3. **第三步**：
+
+   调用`scanner对象`的`next`方法，`获取键盘录入的字符串`，*`String str = scanner.next();`*
+
+4. **第四步**
+
+   使用获取到的字符串变量 `str`后续处理
+
+## 示例
+
+接下来我们简单的演示下键盘数据输入，并通过 `Scanner 类`的 `next()` 与 `nextLine()` 方法`获取输入的字符串`，*在读取前我们一`般需要使用` `hasNext` 与 `hasNextLine` 判断是否还有输入的数据*
+
+
+### 输入 String 类型
+
+#### 使用 next 方法
+
+##### 代码
+
+```java
+import java.util.Scanner;
+
+public class ScannerTest {
+    public static void main(String[] args) {
+        //创建键盘录入对象
+        Scanner scanner = new Scanner(System.in);
+
+        // 从键盘接收数据
+        // 语句提示
+        System.out.println("使用 next 方式接收的数据 ：");
+
+        // 判断是否还有输入
+        if (scanner.hasNext()) {
+            // 调用next()方法获取键盘录入字符串
+            String str = scanner.next();
+            System.out.println("键盘输入的数据为：" + str);
+        }
+        
+        //关闭此扫描仪
+        scanner.close();
+    }
+}
+
+```
+
+##### 运行结果
+
+
+```shell
+$ javac ScannerTest.java
+$ java ScannerTest
+
+使用 next 方式接收的数据 ：
+欢迎来到 超Ren专属
+键盘输入的数据为：欢迎来到
+```
+
+这时候可以看到 `超Ren专属` 字符串并未输出，接下来我们看 `nextLine` 方法。
+
+
+#### 使用 nextLine 方法
+
+##### 代码
+
+
+```java
+import java.util.Scanner;
+
+public class ScannerTest {
+    public static void main(String[] args) {
+        //创建键盘录入对象
+        Scanner scanner = new Scanner(System.in);
+
+        // 从键盘接收数据
+        //语句提示
+        System.out.println("使用 nextLine 方式接收的数据 ：");
+
+        // 判断是否还有输入
+        if (scanner.hasNextLine()) {
+            // 调用 nextLine() 方法获取键盘录入字符串
+            String str = scanner.nextLine();
+            System.out.println("键盘输入的数据为：" + str);
+        }
+
+        //关闭此扫描仪
+        scanner.close();
+    }
+}
+```
+
+##### 运行结果
+
+
+```shell
+$ javac ScannerTest.java
+$ java ScannerTest
+
+使用 nextLine 方式接收的数据 ：
+欢迎来到 超Ren专属
+键盘输入的数据为：欢迎来到 超Ren专属
+```
+
+这时候可以看到 `超Ren专属` 字符串输出了。好奇的小伙伴肯定在想这代码没多大区别啊，就是用的两个不同的方法，别着急，下面我们来说下 `next()` 与 `nextLine()` 方法的区别！
+
+
+#### next() 与 nextLine() 区别
+
+##### next() 方法
+
+- *一定要读取到`有效字符`后`才可以` `结束输入`*。
+
+- *对输入有效字符之前遇到的空白，`next()` 方法会自动将其去掉*。
+
+- *只有输入有效字符后才将其后面输入的空白作为分隔符或者结束符*。
+
+- *`next()` 方法不能得到带有空格的字符串*。
+
+
+##### nextLine() 方法
+
+- *以 `Enter（回车键）`为`结束符`，也就是说 `nextLine()方法`返回的是输入回车之前的所有字符*。
+
+- *可以获得空白*。
+
+
+### 输入 int 、 float 或 double 类型
+
+如果要输入 `int` 或 `float` 类型的数据，在 Scanner 类中也有支持，但是在输入之前`最好` `先使用` `hasNextXxx()` 方法`进行验证`，再使用 `nextXxx()` 来`读取`
+
+#### 使用 nextInt()  、 nextFloat() 方法 和 nextDouble() 方法
+
+下面示例我们可以输入三个数字，并求其总和与平均数，每输入一个数字用回车确认，输入三个数后，计算其总和和平均数.
+
+##### 代码
+
+
+```java
+import java.util.Scanner;
+
+public class ScannerTest {
+
+    public static void main(String[] args) {
+        //创建键盘录入对象
+        Scanner scanner = new Scanner(System.in);
+
+        // 从键盘接收数据
+        int i = 0;
+        float f = 0.0f;
+        double d = 0;
+        int m = 0;
+
+        System.out.print("请输入整数：");
+        if (scanner.hasNextInt()) {
+            // 判断输入的是否是整数
+            i = scanner.nextInt();
+            m = m + 1;
+            // 接收整数
+            System.out.println("您输入的整数数据为：" + i);
+        } else {
+            // 输入错误的信息
+            System.out.println("您输入的不是整数！");
+        }
+
+
+        System.out.print("请输入小数：");
+        if (scanner.hasNextFloat()) {
+            // 判断输入的是否是小数
+            //同一个键盘录入对象，可以录入多次数据
+            f = scanner.nextFloat();
+            m = m + 1;
+            // 接收小数
+            System.out.println("您输入的小数数据为：" + f);
+        } else {
+            // 输入错误的信息
+            System.out.println("您输入的不是小数！");
+        }
+
+
+        System.out.print("请继续输入小数: ");
+        if (scanner.hasNextDouble()) {
+            // 判断输入的是否是小数
+            //同一个键盘录入对象，可以录入多次数据
+            d = scanner.nextDouble();
+            m = m + 1;
+            // 接收小数
+            System.out.println("您输入的小数数据为：" + d);
+        } else {
+            // 输入错误的信息
+            System.out.println("您输入的不是小数！");
+        }
+
+        System.out.println("本次输入完毕");
+
+        System.out.println("输入的三者之和为：" + (i + f + d));
+        System.out.println("输入的三者的平均值为: " + ((i + f + d) / m));
+
+        //关闭此扫描仪
+        scanner.close();
+    }
+}
+```
+
+##### 运行结果
+
+
+```shell
+$ javac ScannerTest.java
+$ java ScannerTest
+
+请输入整数：100
+您输入的整数数据为：100
+请输入小数：66.66
+您输入的小数数据为：66.66
+请继续输入小数: 13.14
+您输入的小数数据为：13.14
+本次输入完毕
+输入的三者之和为：179.80000366210936
+输入的三者的平均值为: 59.933334554036456
+```
+
+当输入完成后就可以输出所有输入的数，计算出它们的总和和平均数。小数位数太多，是因为使用了 `float` 的计算，导致结果不够精确，建议`小数类型`使用 `double` 类型
+
+## 总结
+
+看到这，今天有趣的代码就结束了，快去试一试，让你的程序更加活灵活现，由你而变，就看你的想象力啦！别着急，还有更多有趣的代码、秘密等着你来探索！
+
+
+
+分享嗨起来，在看点起来，美德传起来，点个星标从此探索之路不迷茫！

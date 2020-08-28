@@ -1,2 +1,0 @@
-I"�<p>对于小不点的项目来说，RateLimiter配合ConcurrentHashMap可以对用户进行简单的限流，防止用户频繁刷量或者高频请求。</p>
-:ET

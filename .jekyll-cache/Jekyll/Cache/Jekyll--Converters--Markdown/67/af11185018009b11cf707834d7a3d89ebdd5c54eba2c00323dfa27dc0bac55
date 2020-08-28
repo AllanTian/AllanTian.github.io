@@ -1,2 +1,0 @@
-I"<p>之前写了一篇 Lambda 的入门文章，有小伙伴很认真地参考着学习了一下，并且在学习的过程中提出了新的问题：“老哥，当我在使用 Lambda 表达式中使用变量的时候，编译器提醒我‘Local variable limit defined in an enclosing scope must be final or effectively final’，意思就是‘从 Lambda 表达式引用的本地变量必须是最终变量或实际上的最终变量’，这其中的 final 和 effectively final 到底有什么区别呢？”</p>
-:ET

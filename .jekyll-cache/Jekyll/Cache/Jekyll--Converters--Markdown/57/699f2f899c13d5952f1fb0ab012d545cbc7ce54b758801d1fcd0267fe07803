@@ -1,0 +1,108 @@
+I"�<div class="row">
+
+    <div class="col-md-12">
+
+        <ul id="posts-list">
+            
+                
+            
+                
+                <li class="posts-list-item">
+                    <div class="posts-content">
+                        <span class="posts-list-meta">2020-08-14</span>
+                        <a class="posts-list-name bubble-float-left" href="http://localhost:4000/life/2020/08/14/MyBatis%E5%87%A0%E7%A7%8D%E5%B8%B8%E8%A7%81%E7%9A%84%E5%88%86%E9%A1%B5%E5%AE%9E%E7%8E%B0.html">MyBatis几种常见的分页实现</a>
+                        <span class="circle"></span>
+                    </div>
+                </li>
+                
+            
+                
+                <li class="posts-list-item">
+                    <div class="posts-content">
+                        <span class="posts-list-meta">2020-06-14</span>
+                        <a class="posts-list-name bubble-float-left" href="http://localhost:4000/life/2020/06/14/%E5%8F%98%E9%87%8F.html">Java变量</a>
+                        <span class="circle"></span>
+                    </div>
+                </li>
+                
+            
+                
+            
+        </ul> 
+
+        <!-- Pagination -->
+        
+
+
+        <!-- Comments -->
+       <div class="comment">
+         
+
+  
+    <a href="#" class="show_disqus_comment" onclick="return false;">Show Disqus Comments</a>
+    <div id="disqus_thread"></div>
+    <script>
+    var disqus_config = function () {
+        this.page.url = 'http://localhost:4000/life';
+        this.page.identifier = '/life';
+        this.page.title = '你的程序人生和我一样吗';
+    };
+    var disqus_loaded = false;
+    $(function() {
+        $('.show_disqus_comment').on('click', function() { // DON'T EDIT BELOW THIS LINE
+            $(this).html('加载中...');
+            var that = this;
+            if (!disqus_loaded) {
+                var d = document, s = d.createElement('script');
+
+                s.type = 'text/javascript';
+                s.async = true;
+                var shortname = 'AllanTian';
+
+                s.src = '//' + shortname + '.disqus.com/embed.js';
+
+                s.setAttribute('data-timestamp', +new Date());
+                (d.head || d.body).appendChild(s);
+
+                disqus_loaded = true;
+            }
+            $(that).remove();
+        })
+    })
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+  
+
+  
+        <div id="gitalk-container"></div>
+        <script src="/assets/js/gitalk.min.js"></script>
+        <script>
+        var gitalk = new Gitalk({
+            id: decodeURI('/life'),
+            clientID: 'db18c2f898eca4e19908',
+            clientSecret: 'ad9260f672a9bf7f7aa2f4c752d52c8be39288a8',
+            repo: 'blog-comments',
+            owner: 'AllanTian',
+            admin: ['AllanTian'],
+            labels: ['gitment'],
+            perPage: 50,
+        })
+        gitalk.render('gitalk-container')
+        </script>
+  
+
+
+       </div>
+    </div>
+
+</div>
+<script>
+    $(document).ready(function(){
+
+        // Enable bootstrap tooltip
+        $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+
+    });
+</script>
+
+:ET

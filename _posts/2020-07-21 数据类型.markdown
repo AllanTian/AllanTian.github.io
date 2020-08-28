@@ -1,0 +1,544 @@
+# Java 数据类型
+
+
+## 前言
+
+前面我们说了Java的变量和常量，当时说声明变量或常量的时候，都必须先声明其类型。那这所说的类型到底都是什么类型呢？而数据类型又是什么？今天我就带大家走进数据类型的海洋，了解Java 的数据类型到底是神马！
+
+
+
+## 定义
+
+因 java 是一个 **强类型语言** ：需要显式的说明内存空间的大小，而声明变量的时候，就需要说明变量的数据类型，以此来表示内存的大小，通过定义不同类型的变量，可以在内存中储存整数、小数或者字符。
+
+
+## 分类
+
+Java 语言将的数据类型分类为两大种：**基本数据类型**（Primitive Type）和 **引用数据类型**（Reference Type）。
+
+
+### 基本数据类型
+
+#### 定义
+
+在 jdk中 已经定义好的一些类型，这些类型无法增加，描述的都是一些简单的数据。而这些数据描述的是数值 **本身**。
+
+
+#### 组成
+
+基本数据类型 总的来说分为 **四类八种** ，到底是那四类那八种呢，继续往下看 👇
+
+##### 四类
+
+ **整数类型**
+
+
+- *`byte (字节型)	`*
+
+byte 类型是最小的整数类型。当用户从网络或文件中处理数据流时，或者处理可能与 Java 的其他内置类型不直接兼容的未加工的二进制数据时，该类型非常有用。
+
+
+- *`short（短整型)	`*
+
+short 类型限制数据的存储为先高字节，后低字节，这样在某些机器中会出错，因此该类型很少被使用。
+
+
+- *`int（整型)`*
+
+int 类型是最常使用的一种整数类型。一般地整型变量默认为 int 类型；
+
+- *`long（长整型)`*
+
+对于大型程序常会遇到很大的整数，当超出 int 类型所表示的范围时就要使用 long 类型。
+    
+**小数类型**（ IEEE754标准 ）
+
+- *`float（单精度浮点型)`*
+
+
+float 数据类型是单精度、32位、符合IEEE 754标准的浮点数	， 在储存大型浮点数组的时候可节省内存空间。
+
+- *`double （双精度浮点型)`*
+
+double 数据类型是双精度、64 位、符合IEEE 754标准的浮点数，	*浮点数的默认类型为double类型*
+
+
+
+
+**字符类型** 
+
+- *`char（字符型)`*
+
+使用单引号引起来的，单个的 16 位 Unicode 字符，也就是单一的一个符号 。
+
+在计算机中，所有的数据都是使用数字来进行表示，那当然 字符也不例外。
+ 
+字符类型（char）使用两个字节的 **Unicode 编码** 表示，它支持世界上所有语言，可以使用单引号字符或者整数对 char 型赋值。
+
+
+**布尔类型**
+
+- *`boolean（布尔型) `*
+
+布尔类型用于对两个数值通过逻辑运算，判断结果是“真”还是“假”。Java 中用保留字 true 和 false 来代表逻辑运算中的“真”和“假”。因此，一个 boolean 类型的变量或表达式只能是取 true 和 false 这两个值中的一个，只作为一种标志来记录 true/false 情况。
+
+
+
+##### 八种
+
+
+byte（字节型）、short（短整型）、int（整型）、long（长整型）、float（单精度浮点型）、double （双精度浮点型）、 char（字符型）和 boolean（布尔型）共 8 种
+
+具体详细可看下表
+
+
+| 关键字  | 类型名称  |  占用内存 | 取值范围 |
+| --- | --- | --- | --- |
+| byte  | 字节型  | 1 字节  | -128~127  |
+| short  | 短整型  | 2 字节  | -2^15~2^15-1  |
+| int  | 整型  | 4 字节  | -2^31~2^31-1  |
+| long  | 长整型  | 8 字节  | -2^63~2^63-1  |
+| float  | 单精度浮点型  | 4 字节  | +/-3.4E+38F  |
+| double  | 双精度浮点型  | 8 字节  | +/-1.8E+308  |
+| char  | 字符型  | 2 字节  | ISO 单一字符集  |
+| boolean  | 布尔型  | 未知  | true 或 false  |
+
+
+
+#### 举例
+
+
+对于数值类型的基本类型的取值范围，我们无需强制去记忆，因为它们的值都已经以常量的形式定义在对应的包装类中了。请看下面的例子：
+
+
+```java
+public class PrimitiveTypeTest {  
+    public static void main(String[] args) {  
+        // byte  
+        System.out.println("基本类型：byte 二进制位数：" + Byte.SIZE);  
+        System.out.println("包装类：java.lang.Byte");  
+        System.out.println("最小值：Byte.MIN_VALUE=" + Byte.MIN_VALUE);  
+        System.out.println("最大值：Byte.MAX_VALUE=" + Byte.MAX_VALUE);  
+        System.out.println();  
+  
+        // short  
+        System.out.println("基本类型：short 二进制位数：" + Short.SIZE);  
+        System.out.println("包装类：java.lang.Short");  
+        System.out.println("最小值：Short.MIN_VALUE=" + Short.MIN_VALUE);  
+        System.out.println("最大值：Short.MAX_VALUE=" + Short.MAX_VALUE);  
+        System.out.println();  
+  
+        // int  
+        System.out.println("基本类型：int 二进制位数：" + Integer.SIZE);  
+        System.out.println("包装类：java.lang.Integer");  
+        System.out.println("最小值：Integer.MIN_VALUE=" + Integer.MIN_VALUE);  
+        System.out.println("最大值：Integer.MAX_VALUE=" + Integer.MAX_VALUE);  
+        System.out.println();  
+  
+        // long  
+        System.out.println("基本类型：long 二进制位数：" + Long.SIZE);  
+        System.out.println("包装类：java.lang.Long");  
+        System.out.println("最小值：Long.MIN_VALUE=" + Long.MIN_VALUE);  
+        System.out.println("最大值：Long.MAX_VALUE=" + Long.MAX_VALUE);  
+        System.out.println();  
+  
+        // float  
+        System.out.println("基本类型：float 二进制位数：" + Float.SIZE);  
+        System.out.println("包装类：java.lang.Float");  
+        System.out.println("最小值：Float.MIN_VALUE=" + Float.MIN_VALUE);  
+        System.out.println("最大值：Float.MAX_VALUE=" + Float.MAX_VALUE);  
+        System.out.println();  
+  
+        // double  
+        System.out.println("基本类型：double 二进制位数：" + Double.SIZE);  
+        System.out.println("包装类：java.lang.Double");  
+        System.out.println("最小值：Double.MIN_VALUE=" + Double.MIN_VALUE);  
+        System.out.println("最大值：Double.MAX_VALUE=" + Double.MAX_VALUE);  
+        System.out.println();  
+  
+        // char  
+        System.out.println("基本类型：char 二进制位数：" + Character.SIZE);  
+        System.out.println("包装类：java.lang.Character");  
+        // 以数值形式而不是字符形式将Character.MIN_VALUE输出到控制台  
+        System.out.println("最小值：Character.MIN_VALUE="  
+                + (int) Character.MIN_VALUE);  
+        // 以数值形式而不是字符形式将Character.MAX_VALUE输出到控制台  
+        System.out.println("最大值：Character.MAX_VALUE="  
+                + (int) Character.MAX_VALUE);  
+    }  
+}
+```
+
+##### 运行结果
+
+
+```java
+基本类型：byte 二进制位数：8
+包装类：java.lang.Byte
+最小值：Byte.MIN_VALUE=-128
+最大值：Byte.MAX_VALUE=127
+
+基本类型：short 二进制位数：16
+包装类：java.lang.Short
+最小值：Short.MIN_VALUE=-32768
+最大值：Short.MAX_VALUE=32767
+
+基本类型：int 二进制位数：32
+包装类：java.lang.Integer
+最小值：Integer.MIN_VALUE=-2147483648
+最大值：Integer.MAX_VALUE=2147483647
+
+基本类型：long 二进制位数：64
+包装类：java.lang.Long
+最小值：Long.MIN_VALUE=-9223372036854775808
+最大值：Long.MAX_VALUE=9223372036854775807
+
+基本类型：float 二进制位数：32
+包装类：java.lang.Float
+最小值：Float.MIN_VALUE=1.4E-45
+最大值：Float.MAX_VALUE=3.4028235E38
+
+基本类型：double 二进制位数：64
+包装类：java.lang.Double
+最小值：Double.MIN_VALUE=4.9E-324
+最大值：Double.MAX_VALUE=1.7976931348623157E308
+
+基本类型：char 二进制位数：16
+包装类：java.lang.Character
+最小值：Character.MIN_VALUE=0
+最大值：Character.MAX_VALUE=65535
+```
+
+
+Float和Double的最小值和最大值都是以科学记数法的形式输出的，结尾的"E+数字"表示E之前的数字要乘以10的多少次方。比如3.14E3就是3.14 × 103 =3140，3.14E-3 就是 3.14 x 10-3 =0.00314。
+
+实际上，JAVA中还存在另外一种基本类型 void，它也有对应的包装类 java.lang.Void，不过我们无法直接对它们进行操作。
+
+#### 类型默认值
+
+|   数据类型  |  默认值   | 
+| --- | --- |
+|  byte   |   0  | 
+|   short  |  0   |  
+|   int  |   0  |    
+|   long  |   0L  |  
+|   float  |  0.0f   |    
+|   double  |  0.0d   |    
+|   char  |   'u0000'  |    
+|   String(or any object)  |   null  |   
+|   boolean  |   false  |   
+
+##### 举例
+
+
+```java
+public class Test {
+    
+    static byte by;
+    static short sh;
+    static int i;
+    static long l;
+    static float f;
+    static double d;
+    static char ch;
+    static String str;
+    static boolean bool;
+ 
+    public static void main(String[] args) {
+        
+        System.out.println("Byte :" + by);
+        System.out.println("Short :" + sh);
+        System.out.println("Integer :" + i);
+        System.out.println("Long :" + l);
+        System.out.println("Float :" + f);
+        System.out.println("Double :" + d);
+        System.out.println("Character:" + ch);
+        System.out.println("String :" + str);
+        System.out.println("Boolean :" + bool);
+    }
+}
+```
+
+##### 运行结果
+
+
+```java
+Byte     :0
+Short    :0
+Integer  :0
+Long     :0
+Float    :0.0
+Double   :0.0
+Character:
+String   :null
+Boolean  :false
+```
+
+
+
+
+### 引用数据类型
+
+
+- 数据描述的不是数据本身，而是在描述真正数据的 **地址**。一般都是使用一些自定义的类去描述，相当于各种基本类型的组合，形成一个复杂的类型。
+
+- 引用数据类型建立在基本数据类型的基础上，包括数组、类 和接口。引用数据类型是由用户自定义，用来限制其他数据的类型
+
+- 在Java中，引用类型的变量非常类似于C/C++的指针。引用类型指向一个对象，指向对象的变量是引用变量。这些变量在声明时被指定为一个特定的类型，比如 Employee、People 等。变量一旦声明后，类型就不能被改变了。
+
+但是，Java 语言中不支持 C++ 中的指针类型、结构类型、联合类型和枚举类型。
+
+
+- 所有引用类型的默认值都是 **null**。一个引用变量可以用来引用任何与之兼容的类型。
+
+- 所谓引用数据类型就是对一个对象的引用，对象包括实例和数组两种。实际上，引用类型变量就是一个指针，只是 Java 语言里不再使用指针这个说法。
+
+- 空类型（null type）就是 null 值的类型，这种类型没有名称。因为 null 类型没有名称，所以不可能声明一个 null 类型的变量或者转换到 null 类型。
+
+- 空引用（null）是 null 类型变量唯一的值。空引用（null）可以转换为任何引用类型。
+
+- 在实际开发中，程序员可以忽略 null 类型，假定 null 只是引用类型的一个特殊直接量。
+
+注意：空引用（null）只能被转换成引用类型，不能转换成基本类型，因此不要把一个 null 值赋给基本数据类型的变量。
+
+
+
+## 结构图
+
+
+
+## 数据类型转换
+
+
+
+
+数据类型的转换就是在所赋值的数值类型和被变量接收的数据类型不一致时发生的，它需要从一种数据类型转换成另一种数据类型。
+
+数据类型的转换可以分为 **隐式转换（自动类型转换）** 和 **显式转换（强制类型转换）** 两种。
+
+### 隐式转换（自动类型转换）
+
+整型、实型（常量）、字符型数据可以混合运算。运算中，不同类型的数据先转化为同一类型，然后进行运算。
+
+当小的范围的数据类型和大的范围的数据类型在运算时，会先将小的范围的数据类型的数据，提升为大的范围的数据类型，再进行运算。运算的结果还是大的范围的数据类型
+
+
+#### 数据类型表示范围的比较
+
+转换从低级到高级
+
+> 低  ------------------------------------>  高
+
+> byte , short , char —> int —> long —> float —> double 
+
+
+#### 数据类型转换必须满足如下规则：
+
+1. 不能对boolean类型进行类型转换。
+
+2. 不能把对象类型转换成不相关类的对象。
+
+3. 在把容量大的类型转换为容量小的类型时必须使用强制类型转换。
+
+4. 转换过程中可能导致溢出或损失精度，例如：
+    
+    > int i = 128;   
+    byte b = (byte)i;
+  
+ 
+
+
+    因为 byte 类型是 8 位，最大值为127，所以当 int 强制转换为 byte 类型时，值 128 时候就会导致溢出。
+
+5. 浮点数到整数的转换是通过舍弃小数得到，而不是四舍五入，例如：
+    
+    > (int)23.7 == 23;        
+    (int)-45.89f == -45;
+    
+#### 注意事项
+
+byte、short、 char、int 在相互运算时，会直接统统提升为 int 类型，而非较大类型 int 以及 int 以上的类型，在相互运算时，会提升为较大类型
+
+#### 举例
+
+必须满足转换前的数据类型的位数要低于转换后的数据类型
+
+**one:**
+
+```java
+public class ImplicitConversion {
+    public static void main(String[] args) {
+        int i = 10;
+        long g = 100;
+        
+        //小类型转成大类型，结果还是大类型
+        long result = i + g;
+
+        byte b = 100;
+        short s = 200;
+        short resultS = b + s;//结果是int类型，无法存储到short类型变量中
+    }
+}
+```
+
+
+**two**
+
+
+
+```java
+/* 
+short数据类型的位数为16位，就可以自动转换位数为32的int类型，
+同样float数据类型的位数为32，可以自动转换为64位的double类型。
+*/
+public class ZiDongLeiZhuan{
+        public static void main(String[] args){
+            //定义一个char类型
+            char c1='a';
+            
+            //char自动类型转换为int
+            int i1 = c1;
+            System.out.println("char自动类型转换为int后的值等于"+i1);
+            
+            //定义一个char类型
+            char c2 = 'A';
+            
+            //char 类型和 int 类型计算
+            int i2 = c2+1;
+            System.out.println("char类型和int计算后的值等于"+i2);
+        }
+}
+```
+
+**two 运行结果**
+
+```java
+char自动类型转换为int后的值等于97
+char类型和int计算后的值等于66
+```
+
+c1 的值为字符 a ，查 ASCII 码表可知对应的 int 类型值为 97， A 对应值为 65，所以 **i2=65+1=66**。 
+
+ASCII 码对应值可看上文 ASCII 编码表👆
+
+
+### 显式转换（强制类型转换）
+
+尽管自动类型转换是很有帮助的，但并不能满足所有的编程，
+
+当两种数据类型不兼容，或需要大的范围的数据类型的数据，要转成小范围的数据类型，自动转换将无法进行，这时就需要使用强制转换。
+
+#### 强制转换语法
+
+> **(type)variableName**
+
+
+> //  (要转成的数据类型)需要转换的数据
+
+**type** 为 *variableName 要转换成的数据类型*，
+
+**variableName** 是指 *要进行类型转换的变量名称*
+
+
+#### 注意事项
+
+运算的结果，未必和生活中的结果相同
+
+
+#### 举例
+
+
+```java
+public class QiangZhiZhuanHuan {
+
+    public static void main(String[] args) {
+        int i = 100;
+        //将i转成较小的范围的数据类型
+        //强制类型转换为byte
+        byte b = (byte) i;
+        System.out.println("将int类型i 强制类型转换为byte后的值等于 :" + b);
+
+        System.out.println((byte) 129);
+
+        byte b1 = 10;
+        byte b2 = 20;
+        byte result = (byte) (b1 + b2);
+        System.out.println(result);
+
+        byte b3 = 100;
+        byte b4 = 30;
+        byte result34 = (byte) (b3 + b4);
+        System.out.println(result34);
+    }
+
+}
+```
+
+##### 运行结果
+
+
+```java
+将int类型i 强制类型转换为byte后的值等于 :100
+-127
+30
+-126
+```
+
+### 隐含强制类型转换
+
+1. 整数的默认类型是 int。
+
+2. 浮点型不存在这种情况，因为在定义 float 类型时必须在数字后面跟上 F 或者 f。
+
+
+## 拓展
+ 
+ 
+一般计算机语言使用 ASCII 编码，用一个字节表示一个字符。ASCII 码是 Unicode 码的一个子集，用 Unicode 表示 ASCII 码时，其高字节为 0，它是其前 255 个字符。
+
+Unicode 字符通常用十六进制表示。例如 "\u0000" ~ "\u00ff" 表示 ASCII 码集。"\u"表示转义字符，它用来表示其后 4 个十六进制数字是 Unicode 码。
+
+### 字符与数字的关系
+
+而我们所看到的字符，和计算机中的数字，有一个转换对应关系：
+
+从字符到数字的过程，叫做【**编码**】
+
+从数字到字符的过程，叫做【**解码**】
+
+
+其中，在转换过程中的对应关系，就叫做【编码表】
+
+
+编码表，别称：字符集，最开始只有英文、数字和英文状态的特殊符号，定义在ASCII编码表中
+
+##### 🔗附带一份 ASCII 编码表，需要的快快收藏🏷
+
+
+### 规律
+
+数字本身连续，数字到大写字母不连续；大写字母本身连续，大写字母到小写字母不连续；小写字母本身连续。
+
+### 介绍
+
+- 各个国家都有自己的字符，所以都需要定义自己的编码表，其中中国的编码表：GB2312，GBK，其中都是中国的文字，GBK编码表中，前面的128个数字都是ASCII编码表中相同的内容。表示一个英文使用1个字节，表示一个中文2个字节。
+
+- 各个国家都有自己的编码表，出现一个统一码，Unicode使用2个字节表示一个字符，总共能表示2^16个字符，0-65535，可以表示全世界所有的字符。Java语言在内存中，表示字符，就是使用Unicode编码。
+
+- UTF-8编码形式，使用1字节-3字节表示一个字符，英文使用1个字节表示，中文使用3个字节表示。
+
+### 总结
+
+- 在内存中一般使用Unicode编码，在磁盘、网络中使用GBK、UTF-8；无论是GBK、Unicode、UTF-8统统都兼容ASCII编码表，ASCII编码表中的数字，在任意一个编码表中，对应的字符，都是相同。
+
+
+- Java中表示字符使用的Unicode编码，所以可以使用Unicode码值来表示一个字符，表示格式：’\uXXXX’，\u表示使用Unicode码值表示一个字符，XXXX表示使用4个16进制的数表示Unicode码值
+
+
+## 总结
+
+看到这里的小伙伴那都是今天“最胖”的！不得不说嘛，Java的数据类型那可真是犹如市场商品，应有尽有！多种分类多种类型，撸起码来任你挑选，任你转换，自动、强制，太爽了！看的我也是心潮澎湃，要去速速的体验一波了，还有更多的秘密等着你来探索，加个星标，探索之路不迷茫！今天探索无尽的秘密之路，看到这就正式完结！下文再见！
+
+
+
+

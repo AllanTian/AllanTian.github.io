@@ -1,2 +1,0 @@
-I"�<p>启动 Eclipse 的时候，出现了下面这个错误 <code class="highlighter-rouge">org.eclipse.e4.core.di.InjectionException: java.lang.NoClassDefFoundError: javax/annotation/PostConstruct</code></p>
-:ET

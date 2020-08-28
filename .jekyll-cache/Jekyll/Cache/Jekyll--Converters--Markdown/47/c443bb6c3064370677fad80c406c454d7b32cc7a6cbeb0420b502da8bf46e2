@@ -1,2 +1,0 @@
-I"�<p>对于 Java 的序列化，我一直停留在最浅显的认知上——把那个要序列化的类实现 <code class="highlighter-rouge">Serializbale</code> 接口就可以了。我不愿意做更深入的研究，因为会用就行了嘛。</p>
-:ET

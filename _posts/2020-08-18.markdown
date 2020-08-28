@@ -1,0 +1,550 @@
+# Linux 系统 tar 文件压缩打包命令
+
+
+## 引言
+
+前面我们说了打包和压缩，才知道了打包和压缩不一样啊，那日常中打包和压缩该如何操作呢，小伙伴们肯定想说，这还用问吗，像我们日常中不管是 `Windows 系统`还是 `Mac 系统`它们都用`系统自带的打包压缩工具`， *Windows* 系统有本身的*文件资源管理器*； *Mac* 系统也有*原生的归档实用工具*，还有很多*第三方的软件*，比如`Windows`上我们常用的 `WinRAR`、`7-Zip`、`Bandizip`、`好压`等等等等，`Mac`系统上的 `BetterZip`、`Keka`、`The Unarchiver`，还有去年一位国内独立开发者为我们带来了一款完全免费的新作品 —— `eZip` 等等这些都可以快速对文件压缩打包。可是对于开发人员来说的话，操作 Linux 也是家常便饭，那在 Linux上该如何对文件进行压缩打包呢？
+
+今天我们就来分解 在 **Linux系统** 上如何用 **tar** 命令对文件压缩打包！
+
+## tar 命令
+
+### 定义
+
+在` Linux `系统中，日常`最常用的归档（打包）`命令就是 `tar`，该命令*可以将许多文件一起保存到一个单独的磁带或磁盘档案中进行归档*。
+
+不仅如此，该命令还`可以从归档文件中还原所需单个文件`，也就是*打包的反过程*，称为**解打包**。
+
+
+>使用 `tar` 命令`归档的包`通常称为 **tar 包**（ *tar 包文件都是以 “ `.tar` ” 结尾的* ）。
+
+
+
+## tar 打包
+
+### 格式
+
+tar命令打包文件
+
+当 tar 命令用于`打包操作`时，该命令的`基本格式`为：
+
+
+```shell
+$ tar [OPTION ...] [FILE] ...
+
+tar [选项] 源文件或目录
+```
+
+### 含义
+
+下面列出 tar 命令用于`打包`时主要常用的选项和各自的含义
+
+|  选项   |  含义   |
+| --- | --- |
+|  -A   |   将tar文件附加到存档中   |
+|  -c   |   创建一个新的档案  |
+|  -d   |   查找存档和文件系统之间的差异  |
+|  -r   |   将文件追加到归档文件的末尾  |
+|  -t   |   列出档案的内容  |
+|  -u   |   仅追加比归档中的副本更新的文件  |
+|  -x   |   从档案中提取文件  |
+|  -f   |   包名	指定包的文件名。包的扩展名是用来给管理员识别格式的，所以一定要正确指定扩展名  |
+|  -v   |   显示打包文件过程  |
+
+
+
+以下为官方示例
+```shell
+# tar -cf archive.tar foo bar  ＃从文件foo和bar创建archive.tar。
+# tar -tvf archive.tar         ＃详细列出archive.tar中的所有文件。
+# tar -xf archive.tar          ＃从archive.tar中提取所有文件。
+```
+
+
+### 注意⚠️
+
+在使用 *tar* 命令指定选项时*可以不在选项前面输入*“`-`”。例如，使用“`cvf`”选项和 “`-cvf`”起到的作用一样
+
+
+那 `tar 命令`到底是如何`进行打包`的，接下来我们一看便知！ 
+
+### 示例
+
+
+下面给大家举几个例子，一起看看如何使用 *`tar`* 命令 *`打包文件和目录`*。
+
+#### 打包文件和目录
+
+选项 "`-cvf`" 一般是*习惯用法*，记住*打包时需要指定打包之后的文件名*，而且要用 "`.tar`" 作为*扩展名*。
+
+##### one
+
+将 `download.jpg` 打包为 `download.jpg.tar` 文件
+
+```bash
+[root@wht ~]# tar -cvf download.jpg.tar download.jpg 
+download.jpg
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/d0bb871b-8559-44c4-b78f-ec09de1070e3.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=56%252FJGbzzIRuZow%252F1b8%252BRm5g6zUI%253D&Expires=1597820035)
+
+
+##### two
+
+打包 `test` 目录（test为测试目录）
+
+查看 `test` 文件夹目录
+
+```bash
+[root@wht ~]# ll -d test/
+drwxr-xr-x 5 root root 4096 Aug 18 14:43 test/
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/d29235fb-5dae-479b-8b43-36ae81478591.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=Kh16TX3sBW4bKRoqqd59EF0PwWs%253D&Expires=1597820059)
+
+
+把 `test` 目录打包为 `test.tar` 文件
+
+```bash
+[root@wht ~]# tar -cvf test.tar test/
+test/
+test/test1/
+test/test3/
+test/test2/
+```
+![](https://imgkr2.cn-bj.ufileos.com/a1900c6d-ad94-4887-a06d-80a9fa721e1d.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=YKMLdhXjXw%252F0o4Q8ydZp2yDFx5I%253D&Expires=1597820139)
+
+> `tar` 命令也 *可以打包多个文件或目录*，`只要用空格分开`即可
+
+##### three
+
+把 `download.jpg` 文件和 `test` 目录打包成 `all.tar` 文件包
+
+
+```bash
+[root@wht ~]# tar -cvf all.tar download.jpg test/
+download.jpg
+test/
+test/test1/
+test/test3/
+test/test2/
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/3516819e-e334-4302-964a-b726fa319383.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=DQ85mNR8I%252B5BBqftaNvYdYQ7F0o%253D&Expires=1597820560)
+
+
+
+#### 打包并压缩目录
+
+首先声明一点，`压缩命令不能直接压缩目录`，必须先用 `tar 命令`将`目录打包`，然后才能用 `gzip` 命令或 `bzip2` 命令`对打包文件进行压缩`。
+
+
+##### one
+
+因为我们之前已经把 `test目录` 打包成 `test.tar` 文件
+
+查看之前打包的 `test.tar` 文件
+
+
+```bash
+[root@wht ~]# ll -d test test.tar
+drwxr-xr-x 5 root root  4096 Aug 18 14:43 test
+-rw-r--r-- 1 root root 10240 Aug 18 14:46 test.tar
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/a9a4333e-fcc9-4e7c-904b-bb47991694bf.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=Q1XBkkn2eQbp2o1kSLhPopj46V8%253D&Expires=1597822578)
+
+##### two
+
+使用 *`gzip 命令`* 把 `test.tar` 压缩成 `test.tar.gz` ，并查看压缩后文件
+
+
+```bash
+[root@wht ~]# gzip test.tar 
+[root@wht ~]# ll test.tar.gz 
+-rw-r--r-- 1 root root 153 Aug 18 14:46 test.tar.gz
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/c15b807e-f73e-4073-be6a-4702dbb45b98.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=VAihS5u3d1gEZJAL9aDo86Ez73U%253D&Expires=1597822941)
+
+
+
+## tar 解打包
+
+上文提到 `tar 打包`的`反过程`就是 **解打包**，接下来我们就来看看 tar 如何 解打包
+
+### 格式
+
+当 `tar 命令`用于`对 tar 包`做 `解打包` 操作时，该命令的基本格式如下
+
+
+```bash
+[root@wht ~]# tar [选项] 压缩包
+```
+
+### 含义
+
+下面列出 tar 命令用于`解打包`时主要常用的选项和各自的含义
+
+|  选项   |  含义   |
+| --- | --- |
+|  -x   |   对 tar 包做解打包操作  |
+|  -f   |   指定要解压的 tar 包的包名  |
+|  -t   |   只查看 tar 包中有哪些文件或目录，不对 tar 包做解打包操作  |
+|  -C   |   目录	指定解打包位置  |
+|  -v   |   显示解打包的具体过程  |
+
+其实`解打包`和`打包`相比，只是把打包选项 "`-cvf`" 更换为 "`-xvf`"
+
+### 示例
+
+接下来我们来试试如何进行 `解打包`
+
+#### 解打包到当前目录下
+
+查看当前目录下的文件 
+
+
+```bash
+[root@wht ~]# ll
+total 44
+-rw-r--r-- 1 root root 20480 Aug 18 14:59 all.tar
+-rw-r--r-- 1 root root 20480 Aug 18 14:33 download.jpg.tar
+-rw-r--r-- 1 root root   153 Aug 18 14:46 test.tar.gz
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/7614c2bc-2800-4fe2-b71a-bde5d8dee3b6.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=cY9UmxpsZvzxLZHV%252Fop0fs8nTA8%253D&Expires=1597824218)
+
+
+将 `download.jpg.tar` 文件包 `解打包`到 `当前目录下`
+
+
+
+```bash
+[root@wht ~]# tar -xvf download.jpg.tar 
+download.jpg
+```
+
+#### 解打包到指定位置
+
+
+如果使用 "`-xvf`" 选项，则会把 `tar包` 中的文件`解包到当前目录`下。如果想要指定解包位置，则需要使用 "`-C `(大写)" 选项。
+
+将文件包 `test.tar` 解打包到 `/data/` 目录下
+
+
+```bash
+[root@wht ~]# tar -xvf test.tar -C /data/
+test/
+test/test1/
+test/test3/
+test/test2/
+```
+![](https://imgkr2.cn-bj.ufileos.com/2012b992-49cb-4842-a290-be6331d08fc5.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=9LURf1y%252BG6iPHbRZqoS%252F1Ulbdlg%253D&Expires=1597827064)
+
+
+#### 只查看文件包内容不解打包
+
+如果只想查看文件包中有哪些文件，不解打包的话，则可以把`解打包选项` "`-x`" 更换为`测试选项` "`-t`"，如下例
+
+用长格式显示test.tar文件包中文件的详细信息
+
+```bash
+[root@wht ~]# tar -tvf test.tar
+drwxr-xr-x root/root         0 2020-08-18 14:43 test/
+drwxr-xr-x root/root         0 2020-08-18 14:43 test/test1/
+drwxr-xr-x root/root         0 2020-08-18 14:43 test/test3/
+drwxr-xr-x root/root         0 2020-08-18 14:43 test/test2/
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/f5482626-5b4d-44a4-9b7b-f7a0b5fc331d.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=MNvy7M3bfKUJOKedROTs1VHw0HI%253D&Expires=1597827964)
+
+
+## tar 打包压缩（解压缩解打包）
+
+
+tar命令做打包压缩（解压缩解打包）操作
+看到这，小伙伴们肯定在想 这 `Linux` 实在`太不智能`了！ 居然还要`先打包`成 "`.tar`" 格式，`再压缩`成 "`.tar.gz`" 或 "`.tar.bz2`"。
+
+
+其实 `tar 命令`是 *`可以同时打包压缩的`* 😂，前面的讲解之所以`将打包和压缩分开`，是为了让大家再了解下 `Linux 中打包和压缩的不同`。
+
+### 格式
+
+当 `tar 命令` `同时做打包压缩`的操作时，其基本格式如下：
+
+
+```bash
+[root@wht ~]# tar [选项] 压缩包 源文件或目录
+```
+
+下面列出 tar 命令唱用于`打包压缩`时主要常用的选项和各自的含义
+
+|  选择   |  含义   |
+| --- | --- |
+|  -z   |   压缩和解压缩 ".tar.gz" 格式  |
+|  -j   |   压缩和解压缩 ".tar.bz2"格式  |
+
+
+### 示例
+
+#### 压缩 " .tar.gz " 格式
+
+
+把 `/data/` 目录直接`打包压缩`为"`.tar.gz`"格式，通过"`-z`"来`识别格式`，"`-cvf`"和`打包选项`一致
+
+```bash
+[root@wht ~]# tar -zcvf data.tar.gz /data/
+tar: Removing leading `/' from member names
+/data/
+/data/test/
+/data/test/test1/
+/data/test/test3/
+/data/test/test2/
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/f79be891-8657-40f6-8a6a-c2f4d6cb78d4.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=qGaUru70i2XUjJ23GXcMaRbRe%252FE%253D&Expires=1597829764)
+
+
+#### 解压缩 " .tar.gz " 格式
+
+`解压缩`也只是在`解打包`选项 "`-xvf`" 前面加了一个 "`-z`" 选项。
+
+
+`解压缩与解打包`"`.tar.gz`"格式
+
+```bash
+[root@wht ~]# tar -zxvf test.tar.gz 
+test/
+test/test1/
+test/test3/
+test/test2/
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/bc87ef3c-141c-40ed-82d3-053289533018.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=UUTfhx8oMGhK84LjR2h7QDOZ5B0%253D&Expires=1597840962)
+
+
+
+**前面讲的选项 "`-C`" 用于指定解压位置、"`-t`" 用于查看压缩包内容，在这里同样适用。**
+
+
+#### 压缩 ".tar.bz2" 格式
+
+压缩 "`.tar.bz2`" 和 "`.tar.gz`" 格式唯一的不同就是 "`-zcvf`" 选项换成了 "`-jcvf`"
+
+
+将 `/home/` 目录打包压缩为"`.tar.bz2`"格式，注意`压缩包文件名`
+
+```bash
+[root@wht ~]# tar -jcvf datatwo.tar.bz2 /home/
+tar: Removing leading `/' from member names
+/home/
+/home/download.jpg
+/home/test/
+/home/test/test1/
+/home/test/test3/
+/home/test/test2/
+/home/jdk-8u231-linux-x64.tar.gz
+tar (child): bzip2: Cannot exec: No such file or directory
+tar (child): Error is not recoverable: exiting now
+```
+
+
+![](https://imgkr2.cn-bj.ufileos.com/f849b4cb-4565-4117-b0eb-f8498ae07b83.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=6YDoFmwoI4MSqmRjj2EHvButkwU%253D&Expires=1597837376)
+
+![](https://imgkr2.cn-bj.ufileos.com/68b9ab1f-ae94-42fa-9271-3dbdd84750e4.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=jPN66aQDyYUCloPq0JdyGq6AdWQ%253D&Expires=1597837406)
+
+
+此时可以发现，`打包压缩失败`了，出现以下错误：
+
+
+```bash
+tar (child): bzip2: Cannot exec: No such file or directory
+tar (child): Error is not recoverable: exiting now
+```
+
+
+其实失败的原因是因为打包成功了，但是在压缩的过程中，此 Linux 系统并没有安装 `bzip2`，解决问题也比较简单，只需要安装一下 `bzip2` 就可以了。 
+
+这时就有小伙伴好奇了，那为什么 `tar `命令不用安装，其实是因为 tar 算是 Linux 自带的命令，因为所有的Linux发行版上都有这个命令，而且在 `Linux上打包/解包` 文件也非常常见，**tar命令属于是日常必须的命令**。这下知道了吧！
+
+快来安装 bzip2 
+
+##### 安装 bzip2
+
+安装 bzip2 有两种方式
+
+
+- 第一种：`yum` 安装的命令
+
+```
+yum -y install bzip2
+```
+
+
+
+
+- 第二种 `下载源码`，`make 源码安装` 
+
+  如果你的 Linux 系统无法联网的话，就可以使用源码安装，首先下载：[bzip2-1.0.6.tar](https://sourceforge.net/projects/bzip2/)
+
+
+**下载地址：**
+
+> https://sourceforge.net/projects/bzip2/
+
+![](https://imgkr2.cn-bj.ufileos.com/3555e66e-1a80-4f0a-8a39-00cdccbbeda5.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=PRAuvUeSQzcH4XrfeE2J40%252FqfqQ%253D&Expires=1597839743)
+
+
+**安装过程如下：**
+
+首先进入下载页面进行下载，也不大 700多KB ，下载完后，使用 `SSH 将 文件包传输到 Linux 系统上`，如果**没有 SSH 传输工具**，可查看以下 **`蓝色字体`** 查看，**如何下载安装 SecureCRT 和 SecureFX ，还带如何使用啊！真的超级详细！**
+
+> [SecureCRT的下载、安装](https://mp.weixin.qq.com/s?__biz=MzI0MDc0OTgzNA==&mid=2247485699&idx=1&sn=62b4f8dfa1d5116b4d5b5bd25a6bee33&chksm=e9175566de60dc70294d582484c1826faac2c70fae3599df4ba0437e5224e7d2b6714ea81709&token=1796181794&lang=zh_CN#rd)
+
+> [安装好的SecureCRT该如何使用呢？](https://mp.weixin.qq.com/s?__biz=MzI0MDc0OTgzNA==&mid=2247486598&idx=1&sn=0cd210517eb0108eb07130e0d530eeca&chksm=e91750e3de60d9f5392c7180e9bb46eddf87ea2f4d3625e9c2d22943aef3acd39a17154888bf&token=1796181794&lang=zh_CN#rd)
+
+传输完成后，正好用到了前面所说的 **解压缩 " .tar.gz " 格式** 的文件包，按照以下命令操作即可！
+
+```bash
+tar -zxvf bzip2-1.0.6.tar.gz
+cd bzip2-1.0.6/
+#为编译做准备，创建libbz2.so动态链接库(这一步很重要，安装python的时候如果没有这一步，python安装不上bz2模块)：
+make -f Makefile-libbz2_so
+make && make install
+```
+
+我这里采用 `yum` 安装，因为比较快。
+
+
+![](https://imgkr2.cn-bj.ufileos.com/4c2751c0-0779-443b-97eb-4a283ed1b3fd.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=kcO3EuS2wIpxniyuwmKZGP94Mhc%253D&Expires=1597839007)
+
+安装完成后重新将 `/home/` 目录打包压缩为"`.tar.bz2`"格式。这时发现已经成压缩
+
+```bash
+[root@wht ~]# tar -jcvf datatwo.tar.bz2 /home/
+tar: Removing leading `/' from member names
+/home/
+/home/download.jpg
+/home/test/
+/home/test/test1/
+/home/test/test3/
+/home/test/test2/
+/home/jdk-8u231-linux-x64.tar.gz
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/a22cca61-3aa2-44a2-8113-5670a3e70d55.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HNi64wnC1VDmEV9duruRoeMt9PA%253D&Expires=1597840067)
+
+![](https://imgkr2.cn-bj.ufileos.com/736a6879-aa86-4ea3-9027-b5fad3cbee33.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=%252BTn3U8zGLmhBz7w7zT00cMXqrpQ%253D&Expires=1597840076)
+
+#### 解压缩 ".tar.bz2" 格式。
+
+
+`解压缩与解打包`"`.tar.bz2`"格式
+
+```bash
+[root@wht ~]# tar -jxvf datatwo.tar.bz2 
+home/
+home/download.jpg
+home/test/
+home/test/test1/
+home/test/test3/
+home/test/test2/
+home/jdk-8u231-linux-x64.tar.gz
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/c4211228-c704-425c-bb40-c429d1d4c0c4.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=Seo8WoGiIzPSIsOFgmalQCzbaEo%253D&Expires=1597842823)
+
+
+看到这 tar 的`打包`、`解打包`、`打包压缩`、`解打包解压缩` 就分解结束了！但是却有一个`小彩蛋`。不知道小伙伴们有没有发现！
+
+`什么彩蛋呢！`那还不赶紧往下看！
+
+### 彩蛋（注意⚠️）
+
+细心的小伙伴们会发现在上面`同时打包解压`的过程中 `tar 命令报了一个错误`，如果`使用相对路径`的话不会出错，正常使用即可
+
+> tar: Removing leading \`/' from member names
+
+
+这个错误意思就是让我们将路径的` '/'` 去除掉。
+
+#### 问题原因
+
+因为我们使用的是`绝对路径`，而不是`相对路径`。而`tar 命令`**默认是采用相对路径来进行压缩打包的**。
+
+#### 解决办法
+
+我们需要使用选项 "`-P`**(大写)**" 来`允许我们使用绝对路径进行压缩打包`。
+
+选项 `-P` 的含义如下：
+
+> -P 或 --absolute-names ：文件名使用绝对名称，不移除文件名称前的“/”号
+
+
+#### 注意
+
+网上有些文档是 将 `-P` 参数加在 `f` 参数`后面` ，**那么这样是会报错的**。 
+
+#### 错误示例
+
+
+```bash
+[root@wht ~]# tar -zcvfP data.tar.gz /data/
+tar: data.tar.gz: Cannot stat: No such file or directory
+tar: Removing leading `/' from member names
+/data/
+/data/test/
+/data/test/test1/
+/data/test/test3/
+/data/test/test2/
+tar: Exiting with failure status due to previous errors
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/e9a5eb3d-63d3-4f9d-96ac-02d9e23cb443.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=raMYhtumUxY%252Fm48DuWU9H%252Fs8YPw%253D&Expires=1597830817)
+
+
+#### 正确示例
+
+
+我们一般是将 `f`  参数放到`最后`，`-f`  参数后面接上`文件名` ， 将 `P` 放在 `f` `前`即可。
+
+> -f<备份文件> 或 --file=<备份文件>：指定备份文件 
+
+
+在使用 `tar命令` 的时候要注意  `f`  参数的位 ，避免错误**。
+
+
+```
+[root@wht ~]# tar -zcvPf data.tar.gz /data/ 
+/data/
+/data/test/
+/data/test/test1/
+/data/test/test3/
+/data/test/test2/
+```
+
+![](https://imgkr2.cn-bj.ufileos.com/272c5263-9618-4a35-98fc-2968e14cbc16.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=ViMOkiyYMQ%252FWRXT6uXk0bxJtbRs%253D&Expires=1597830993)
+
+这时候这个彩蛋就被完美解决了！
+
+## 总结 
+
+
+**把文件直接压缩成"`.tar.gz`"和"`.tar.bz2`"格式，才是 `Linux` 中`最常用的压缩方式`，这是大家`一定要掌握`的`压缩和解压缩方法`**。
+
+tar 命令 `最初`被`用来在磁带上创建备份`，`现在`可以在`任何设备上创建备份`。
+
+利用 `tar 命令`**可以把一大堆的文件和目录打包成一个文件，这对于备份文件或是将几个文件组合成为一个文件进行网络传输是非常有用的**。
+
+**一定一定要掌握，日常必需命令之一！** 后续还有不少呢！别着急，还有更多的秘密等着你来探索！
+
+
+
+分享嗨起来，在看点起来，美德传起来，点个星标从此探索之路不迷茫！
+
+
+
+
+
+

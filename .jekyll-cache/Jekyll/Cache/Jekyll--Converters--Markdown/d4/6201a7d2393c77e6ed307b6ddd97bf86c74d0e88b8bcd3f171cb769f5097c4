@@ -1,2 +1,0 @@
-I"k<p>在平常的开发当中，HashMap是我最常用的<a href="http://www.itwanger.com/java/2019/11/08/java-jihe-rumen.html">Map类</a>（没有之一），它支持null键和null值，是绝大部分利用键值对存取场景的首选。需要切记的一点是——HashMap不是线程安全的数据结构，所以不要在多线程场景中应用它。</p>
-:ET

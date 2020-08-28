@@ -1,0 +1,710 @@
+---
+layout: post
+category: life
+title: MyBatis几种常见的分页实现
+tagline: by AllanTian
+tags: 
+  - 程序员
+---
+
+
+# MyBatis几种常见的分页实现
+
+## 引言
+
+`mybatis`框架分页实现，有几种方式，最原始的是使用 *`原始切分`* 不建议使用，下来最简单的就是利用原生的sql关键字 *`limit`* 来实现，还有一种就是利用 *`interceptor`* 来拼接sql，实现和 `limit` 一样的功能，再一个就是利用 *`RowBounds`* 来实现，最糊一种就是使用 mybatis 的 *`PageHelper插件`* 来实现，本人强烈推荐使用，功能比较强大齐全，安全性比较高。 这里讲解这五种常见的实现方式。
+
+`千万不要眨眼，好戏连台！`
+
+
+## 准备
+
+首先自定义一个Page工具类，以备后续使用
+
+
+```java
+package com.top.util;
+
+import java.util.List;
+
+public class Pager<T> {
+
+    private Integer page;//分页起始页
+    private Integer size;//每页记录数
+    private List<T> list;//返回的记录集合
+    private Long total;//总记录条数
+
+    public Integer getPage() {
+        return page;
+    }
+
+    public void setPage(Integer page) {
+        this.page = page;
+    }
+
+    public Integer getSize() {
+        return size;
+    }
+
+    public void setSize(Integer size) {
+        this.size = size;
+    }
+
+    public List<T> getList() {
+        return list;
+    }
+
+    public void setList(List<T> list) {
+        this.list = list;
+    }
+
+    public Long getTotal() {
+        return total;
+    }
+
+    public void setTotal(Long total) {
+        this.total = total;
+    }
+}
+```
+
+
+## 实现
+
+### 原始切分（最原始方法，不建议使用）
+
+- *DbStudentsMapper.xml* 查询所有数据
+
+```xml
+<select id="getAll" resultType="com.top.bean.DbStudents" >
+    select
+    <include refid="Base_Column_List"/>
+    from db_students
+</select>
+```
+
+- *DbStudentsServiceImpl.java* 业务层，利用 *List 的 subList()* 方法对数据`进行切片`
+
+
+```java
+public List<DbStudents> getAll(PageInfo info) {
+    List<DbStudents> dbStudentsList = dbStudentsMapper.selectAll();
+    return dbStudentsList.subList(info.getPageNum(), info.getPageSize());
+}
+```
+
+- 控制层直接调用，即可完成分页
+
+
+```java
+@RequestMapping(value = "/getAll", method = RequestMethod.GET)
+@ResponseBody
+public List<DbStudents> getAll(PageInfo info) {
+    List<DbStudents> dbStudentsList = dbStudentsService.getAll(info);
+    if (dbStudentsList.size() == 0) {
+        return new ArrayList<DbStudents>();
+    }
+    return dbStudentsList;
+}
+```
+
+
+### Limit 关键字 实现
+
+- 首先给 `DbStudentsMapper.java` 增加两个方法
+
+  *DAO层*
+
+
+```java
+List<DbStudents> selectByPager(Map<String, Object> params);
+
+long count();
+```
+
+- *DbStudentsMapper.xml* 中增加两个查询
+
+
+
+```xml
+<select id="selectByPager" resultMap="BaseResultMap" resultType="com.top.bean.DbStudents">
+    select <include refid="Base_Column_List"/> from db_students limit #{page},#{size}
+</select>
+
+<select id="count" resultType="long">
+    select count(1) from db_students
+</select>
+```
+
+- *DbStudentsService.java* 接口中 增加分页抽象方法
+
+
+
+
+```java
+Pager<DbStudents> selectByPager(int page, int size);
+```
+
+
+  
+- 在 *DbStudentsServiceImpl.java* 实现类中实现分页方法
+
+```java
+@Override
+public Pager<DbStudents> selectByPager(int page, int size) {
+
+    Map<String, Object> params = new HashMap<String, Object>();
+    params.put("page", (page - 1) * size);
+    params.put("size", size);
+    Pager<DbStudents> pager = new Pager<DbStudents>();
+    List<DbStudents> list = dbStudentsMapper.selectByPager(params);
+    pager.setPage(page);
+    pager.setSize(size);
+    pager.setList(list);
+    pager.setTotal(dbStudentsMapper.count());
+    return pager;
+
+}
+```
+
+- 最后直接控制层调用，请求测试结果发现，成功实现分页
+
+
+```java
+@RequestMapping("showInfo")
+@ResponseBody
+public Pager<DbStudents> showInfo(int page, int size) {
+
+    return dbStudentsService.selectByPager(page, size);
+
+}
+```
+
+
+![](https://imgkr2.cn-bj.ufileos.com/20295741-256e-4d94-9a15-9975aae4a536.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=FaV1LOv9264Fzi%252FAzvXZ%252Bg53%252BJw%253D&Expires=1597477449)
+
+
+这是最直观的实现方式，也是最简单的，不用任何插件或者工具就能够很方便的实现的方法。 
+
+### interceptor plugin 实现 (拦截器插入)
+
+实现比较复杂，首先需要明白 MyBatis 的实现
+
+⚠️ **`注意`** 
+
+特别提醒，若要使用 MyBatis 拦截器实现分页 必须使用 *`mybatis 3.2.0`* *以上版本* 不论是 maven 仓库还是下载的jar，因为 3.2.0 版本以下 *SystemMetaObject* 类会报错，找不到该类。
+
+![](https://imgkr2.cn-bj.ufileos.com/cff18845-34c2-48f2-b572-17ae3237fe74.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=YqUSeclK3AzK7%252BVbgda30GauIXc%253D&Expires=1597477426)
+
+
+- 首先创建 Interceptor 类，拦截 mybatis 接口方法 id 以 ByPager 结束的语句
+
+  
+
+```java
+package com.top.interceptor;
+
+import java.sql.Connection;
+import java.util.Map;
+import java.util.Properties;
+
+import org.apache.ibatis.executor.parameter.ParameterHandler;
+import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.plugin.Interceptor;
+import org.apache.ibatis.plugin.Intercepts;
+import org.apache.ibatis.plugin.Invocation;
+import org.apache.ibatis.plugin.Plugin;
+import org.apache.ibatis.plugin.Signature;
+import org.apache.ibatis.reflection.MetaObject;
+import org.apache.ibatis.reflection.SystemMetaObject;
+
+
+/**
+ * 利用MyBatis拦截器进行分页
+ * 
+ * 注解解释
+ *
+ * @Intercepts 说明是一个拦截器
+ * @Signature 拦截器的签名
+ * type     拦截的类型 四大对象之一( Executor,ResultSetHandler,ParameterHandler,StatementHandler)
+ * method   拦截的方法
+ * args     参数,高版本需要加个Integer.class参数,不然会报错
+ */
+
+@Intercepts({@Signature(type = StatementHandler.class, method = "prepare", args = {Connection.class, Integer.class})})
+public class MyBatisPageInterceptor implements Interceptor {
+
+    //当前现实的页数
+    private int page;
+    //每页显示的条目数
+    private int size;
+    //数据库类型
+    private String dbType;
+
+    @Override
+    public Object intercept(Invocation invocation) throws Throwable {
+        System.out.println("拦截器已经启动");
+
+        //获取StatementHandler,默认的是RoutingStatementHandler
+        StatementHandler statementHandler = (StatementHandler) invocation.getTarget();
+
+        //获取StatementHandler的包装类
+        MetaObject metaObject = SystemMetaObject.forObject(statementHandler);
+
+        //分隔代理对象
+        while (metaObject.hasGetter("h")) {
+            Object object = metaObject.getValue("h");
+            metaObject = SystemMetaObject.forObject(object);
+        }
+        while (metaObject.hasGetter("target")) {
+            Object object = metaObject.getValue("target");
+            metaObject = SystemMetaObject.forObject(object);
+        }
+
+        //获取查看接口映射的相关信息
+        MappedStatement mappedStatement = (MappedStatement) metaObject.getValue("delegate.mappedStatement");
+        String mapId = mappedStatement.getId();
+
+        //拦截以ByInterceptor结尾的请求，统一实现分页功能
+        if (mapId.matches(".+ByPager$")) {
+            System.out.println("已触发分页拦截器");
+
+            //获取进行数据库操作时管理参数的Handler
+            ParameterHandler parameterHandler = (ParameterHandler) metaObject.getValue("delegate.parameterHandler");
+
+            //获取请求时的参数
+            Map<String, Object> params = (Map<String, Object>) parameterHandler.getParameterObject();
+
+            //参数名称和在service中设置到map中的名称一致
+            page = Integer.parseInt(String.valueOf(params.get("page")));
+            size = Integer.parseInt(String.valueOf(params.get("size")));
+
+            //获取原始SQL语句
+            String sql = (String) metaObject.getValue("delegate.boundSql.sql");
+
+            sql = sql.trim();
+
+            //也可以通过statementHandler直接获取
+            //sql = statementHandler.getBoundSql().getSql();
+
+            //构建分页功能的sql语句
+            sql += " limit " + (page - 1) * size + "," + size;
+
+            //重新构建分页功能的SQL语句
+            metaObject.setValue("delegate.boundSql.sql", sql);
+        }
+        //调用原对象的方法，进入责任链的下一级
+        return invocation.proceed();
+    }
+
+    @Override
+    public Object plugin(Object target) {
+        //生成Object对象的动态代理对象
+        return Plugin.wrap(target, this);
+    }
+
+    @Override
+    public void setProperties(Properties properties) {
+        //如果分页每页数量是统一的，可以在这里进行统一配置，也就无需再传入PageInfo信息了,参数是在配置拦截器时配置的
+        String limit = properties.getProperty("limit", "10");
+        this.page = Integer.parseInt(limit);
+        this.dbType = properties.getProperty("dbType", "mysql");
+    }
+
+}
+```
+
+- 接下来在mybatis配置文件 `SqlMapConfig.xml` 中， 增加plugin设置
+
+
+```xml
+<configuration>
+
+    <plugins>
+        <plugin interceptor="com.top.interceptor.MyBatisPageInterceptor">
+            <property name="limit" value="10"/>
+            <property name="dbType" value="mysql"/>
+        </plugin>
+    </plugins>
+
+</configuration>
+```
+
+- 接下来在  `DbStudentsMapper.java` 添加拦截器查询分页方法。此处注意DAO层`接口方法名`需要和代码中自定义的 `".+ByPage$"` 正则表达式相`匹配`,mapper的书写依然是查询所有数据
+
+
+```java
+List<DbStudents> showAllByPage(@Param("page")Integer page,@Param("size")Integer size);
+```
+
+- 在`DbStudentsMapper.xml` 中增加查询所有数据的sql
+
+
+```xml
+<select id="showAllByPage" resultType="com.top.bean.DbStudents" >
+    select
+    <include refid="Base_Column_List"/>
+    from db_students
+</select>
+```
+
+- 最后，控制层直接调用，就可以通过拦截器插件的方式实现了分页功能了
+![](https://imgkr2.cn-bj.ufileos.com/e8ee5d4c-50af-4797-90f2-4aa92cd5fac6.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=GKzIMI%252BUtD9AAyML6wQ6myZw9MM%253D&Expires=1597491731)
+
+
+### RowBounds 实现分页
+
+- 在DAO层定义好所要传输的分页信息，类型为RowBounds
+
+```java
+List<DbStudents> selectListByPage (RowBounds rowBounds);
+```
+
+
+- `DbStudentsMapper.xml` 查询所有数据
+
+```xml
+<select id="selectListByPage" resultType="com.top.bean.DbStudents" >
+    select
+    <include refid="Base_Column_List"/>
+    from db_students
+</select>
+```
+
+- 业务层，将PageInfo信息封装成 `RowBounds`,调用DAO层方法
+
+
+```java
+public List<DbStudents> selectListByPage(PageInfo info) {
+    return dbStudentsMapper.selectListByPage(new RowBounds(info.getPageNum(), info.getPageSize()));
+}
+```
+
+- 最后控制层直接调用即可实现分页查询。
+
+
+### PageHelper 实现（个人强烈推荐）
+
+开源项目 PageHelper 实现，其实本质还是自己封装了个 `Interceptor`
+
+官网地址
+
+> https://pagehelper.github.io/
+
+#### 一、首先引入分页插件
+
+  引入有下面`2`种方式，推荐使用 *Maven* 方式。
+
+1. 引入 Jar 包
+
+你可以从下面的地址中下载最新版本的 jar 包
+
+> https://oss.sonatype.org/content/repositories/releases/com/github/pagehelper/pagehelper/
+
+> https://repo1.maven.org/maven2/com/github/pagehelper/pagehelper/
+
+
+
+由于使用了 `sql 解析工具`，还需要下载 *jsqlparser.jar*：
+
+> https://repo1.maven.org/maven2/com/github/jsqlparser/jsqlparser/0.9.5/
+      
+2. 使用 `Maven`
+  
+  在 `pom.xml` 引入 `PageHelper` 的`依赖`
+
+
+```xml
+<!-- 引入mybatis的 pagehelper 分页插件 -->
+
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper</artifactId>
+    <version>5.1.2</version>
+</dependency>
+```
+
+
+#### 二、配置拦截器插件
+
+***特别注意***，新版拦截器是 `com.github.pagehelper.PageInterceptor`。 com.github.pagehelper.PageHelper 现在是一个特殊的 dialect 实现类，是分页插件的默认实现类，提供了和以前相同的用法。
+
+两种配置方法选一种即可，看个人习惯。
+
+1. 在 MyBatis 配置 xml 中配置拦截器插件
+
+
+```xml
+<!--
+    plugins在配置文件中的位置必须符合要求，否则会报错，顺序如下:
+    properties?, settings?,
+    typeAliases?, typeHandlers?,
+    objectFactory?,objectWrapperFactory?,
+    plugins?,
+    environments?, databaseIdProvider?, mappers?
+-->
+<plugins>
+    <!-- com.github.pagehelper为PageHelper类所在包名 -->
+    <plugin interceptor="com.github.pagehelper.PageInterceptor">
+        <!--reasonable：分页合理化参数，默认值为false,直接根据参数进行查询。
+                      当该参数设置为 true 时，pageNum<=0 时会查询第一页， pageNum>pages（超过总数时），会查询最后一页。-->
+        <!--<property name="reasonable" value="true"/>-->
+    </plugin>
+</plugins>
+```
+
+2. 在 Spring 配置文件中配置拦截器插件
+
+使用 `spring` 的属性配置方式，可以使用 `plugins` 属性像下面这样配置
+
+```xml
+<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <!-- 注意其他配置 -->
+    <property name="plugins">
+        <array>
+            <bean class="com.github.pagehelper.PageInterceptor">
+                <property name="properties">
+                    <!--使用下面的方式配置参数，一行配置一个 -->
+                    <!--此处为我个人配置 -->  
+                    <value>
+                        helperDialect=mysql
+                        reasonable=true
+                        supportMethodsArguments=true
+                        params=count=countSql
+                        autoRuntimeDialect=true
+                    </value>
+                </property>
+            </bean>
+        </array>
+    </property>
+</bean>
+```
+
+#### 三、使用
+
+- *DbStudents 实体类*
+
+
+```java
+
+import lombok.Data;
+
+@Data
+public class DbStudents {
+    private Integer num;
+
+    private String name;
+
+    private Integer age;
+
+    private String birthday;
+
+    private String sex;
+
+    private String address;
+
+    private String major;
+```
+
+- *DbStudentsMapper* 接口     
+
+  注意：`mapper中就按不分页的那种写法就好`
+  
+
+```java
+package com.top.mapper;
+
+import com.top.bean.DbStudents;
+import java.util.List;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DbStudentsMapper {
+      
+     /**
+     * 多条件分页查询
+     * @param dbStudents
+     * @return
+     */
+
+     List<DbStudents> showAllInfo(DbStudents dbStudents);
+}
+```
+
+- *DbStudentsMapper.xml*    
+
+  *注意*：sql 中就不要写 `limit` 了，`pageHelp` 会自己处理，`sql` 就按正常查询写法就好
+  
+  
+```xml
+<!--多条件分页查询用户-->
+<select id="showAllInfo" resultType="com.top.bean.DbStudents">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM
+    db_students
+    <where>
+        <if test="num != null">
+            num = #{num,jdbcType=INTEGER},
+        </if>
+        <if test="name != null">
+            name = #{name,jdbcType=VARCHAR},
+        </if>
+        <if test="age != null">
+            age = #{age,jdbcType=INTEGER},
+        </if>
+        <if test="birthday != null">
+            birthday = #{birthday,jdbcType=VARCHAR},
+        </if>
+        <if test="sex != null">
+            sex = #{sex,jdbcType=VARCHAR},
+        </if>
+        <if test="address != null">
+            address = #{address,jdbcType=VARCHAR},
+        </if>
+        <if test="major != null">
+            major = #{major,jdbcType=VARCHAR},
+        </if>
+    </where>
+</select>
+```
+
+
+
+- *DbStudentsService* 业务层接口
+
+
+```java
+public interface DbStudentsService {
+
+    List<DbStudents> showAllInfo(DbStudents dbStudents);
+}
+```
+
+- *DbStudentsServiceImpl* 业务实现层
+
+
+```java
+@Service
+public class DbStudentsServiceImpl implements DbStudentsService {
+
+
+    @Autowired
+    private DbStudentsMapper dbStudentsMapper;
+
+
+    @Override
+    public List<DbStudents> showAllInfo(DbStudents dbStudents) {
+        return dbStudentsMapper.showAllInfo(dbStudents);
+    }
+}
+```
+
+
+
+- 最后 *DbStudentsController* 控制层直接调用
+
+
+```java
+/**
+ * 分页查询所有信息
+ */
+@RequestMapping("showAllInfo")
+@ResponseBody
+public PageInfo<DbStudents> showAllInfo(@RequestParam(value = "currentPage", required = false, defaultValue = "1") Integer pageNum,
+                                        @RequestParam(value = "pageSize", required = false, defaultValue = "3") Integer pageSize,
+                                        DbStudents dbStudents) {
+    // 使用mybatis的分页插件完成我们的分页查询
+    PageHelper.startPage(pageNum, pageSize);
+    List<DbStudents> employeeList = dbStudentsService.showAllInfo(dbStudents);
+    PageInfo<DbStudents> pageInfo = new PageInfo(employeeList);
+    return pageInfo;
+}
+```
+
+
+-  测试结果为下图，可看到 PageHelper 分页查询已实现
+
+![](https://imgkr2.cn-bj.ufileos.com/3a159d58-d09e-4dd5-a830-f843c9fa0f0f.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=0qnisI0ubPoAes6V3v0XzwKaj0U%253D&Expires=1597501234)
+
+![](https://imgkr2.cn-bj.ufileos.com/94798763-2c64-4a5b-9716-0db53beed501.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=Vh%252FUn3QPemp2NBgk3kMJ4AqAtNc%253D&Expires=1597501234)
+
+
+
+
+#### 附录说明
+
+***
+
+聪明的小伙伴们会发现返回数据中带了很多不知道的参数，接下来我们就来说道说道这些参数都是神马！
+
+`PageInfo` 是 *PageHelper* 自带的分页对象类，以下为 `PageInfo` 的属性说明
+
+
+```java
+//当前页
+private int pageNum;
+
+//每页的数量
+private int pageSize;
+
+//当前页的数量
+private int size;
+
+//由于startRow和endRow不常用，这里说个具体的用法  
+//可以在页面中"显示startRow到endRow 共size条数据"  
+
+//当前页面第一个元素在数据库中的行号
+private int startRow;
+
+//当前页面最后一个元素在数据库中的行号
+private int endRow;
+
+//总记录数
+private long total;
+
+//总页数
+private int pages;
+
+//结果集
+private List<T> list;
+
+//第一页
+private int firstPage;
+
+//前一页
+private int prePage;
+
+//是否为第一页
+private boolean isFirstPage = false;
+
+//是否为最后一页
+private boolean isLastPage = false;
+
+//是否有前一页
+private boolean hasPreviousPage = false;
+
+//是否有下一页
+private boolean hasNextPage = false;
+
+//导航页码数
+private int navigatePages;
+
+//所有导航页号
+private int[] navigatepageNums;
+```
+
+## 总结
+
+当你看到这时，五种 mybatis 分页全部都已经实现完成了，精彩不精彩，这还用问嘛，必须 NICE，那这么多分页的实现方式，还不赶快行动去试一试，找一款适合自己的分页实现方法，撸起来吧！别着急，还有更多的秘密等着你来探索！
+
+
+
+分享嗨起来，在看点起来，美德传起来，点个星标从此探索之路不迷茫！
+
+ 
+
+
+
+

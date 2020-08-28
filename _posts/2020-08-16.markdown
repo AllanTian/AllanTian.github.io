@@ -1,0 +1,120 @@
+# 项目一运行就报错
+
+## 引言
+
+前面我们刚说了 Mybatis 的干货之一 [*`分页实现`*](https://mp.weixin.qq.com/s?__biz=MzI0MDc0OTgzNA==&mid=2247494906&idx=1&sn=16a0ac058faa724e214c36760d292f0a&chksm=e914b09fde6339896a9c652feed0bcbe508e0521e6364b0c47868bb01cf22f6c047a0bc0612b&token=177523646&lang=zh_CN#rd)，我们心热的小杰就去尝试了，可是小浩好不容易把代码敲完，刚刚用IDEA启动项目，结果控制台却收不住了，“嗖 嗖 嗖” 的打印了一堆红红的错误信息，这可把小杰急坏了，就来找我了说，甜哥，你说的那个分页，我写好了想亲自体验下呢，可谁知却出现了另一个头疼的问题，全是错误，我在网上也找了半天也没有解决，看见小杰这么心热，我可不能浇灭这一团热血。就赶快帮小杰解决了，来记录一波，以免其他小伙伴们碰到了着急。那到底是什么问题呢，下面我们就来好好瞧一瞧！
+
+
+
+## 问题
+
+因错误太多了，这里就只截出错误的重点，如下所示
+
+```java
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'org.mybatis.spring.mapper.MapperScannerConfigurer#0' defined in class path resource [beans_core.xml]: Initialization of bean failed; nested exception is java.lang.NoClassDefFoundError: org/apache/ibatis/session/SqlSession
+
+Caused by: java.lang.ClassNotFoundException: org.apache.ibatis.session.SqlSession
+    at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1328)
+    at org.apache.catalina.loader.WebappClassLoaderBase.loadClass(WebappClassLoaderBase.java:1156)
+    ... 79 more
+
+```
+
+
+### 主要错误
+
+
+
+```java
+Caused by: java.lang.ClassNotFoundException: org.apache.ibatis.session.SqlSession
+```
+
+
+
+`造成原因`： 很明显，缺少 `SqlSession` 这个 `bean`
+
+
+还有一种错误情况是这样的
+
+```java
+Caused by: java.lang.ClassNotFoundException: org.mybatis.spring.SqlSessionFactoryBean
+```
+
+这个原因是因为 `SqlSessionFactoryBean` 找不到
+
+
+二者原因其实都是 Mybatis 的原因。如何解决呢，我们继续往下看。
+
+## 解决方式
+
+这种问题的有三种可能
+
+
+
+### 问题一：缺少 jar 包
+
+`解决方法` ：在 `pom.xml` 文件导入 `jar` 包
+
+```xml
+<!-- 版本控制 -->
+<properties>
+    <mybatis.version>3.4.1</mybatis.version>
+    <mybatisspring.version>1.3.0</mybatisspring.version>
+</properties>
+```
+
+```xml
+<dependency>
+  <groupId>org.mybatis</groupId>
+  <artifactId>mybatis</artifactId>
+  <version>${mybatis.version}</version>
+</dependency>
+
+<dependency>
+  <groupId>org.mybatis</groupId>
+  <artifactId>mybatis-spring</artifactId>
+  <version>${mybatis-spring.version}</version>
+</dependency>
+```
+
+
+### 问题二：配置sqlSessionFactory 不正确
+
+`解决方法`：在 `Spring` 的配置文件中 配置 `sqlSessionFactory`
+   
+    
+```xml
+<!-- spring 整合mybatis 使用的工具类 -->
+<bean id="sqlSessionFactory"
+      class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="dataSource"></property>
+    <!-- 扫描制定目录下的mapper.xml文件 -->
+    <property name="mapperLocations"
+              value="classpath:mybatis/mapper/*.xml"></property>
+    <!-- 加载mybatis的配置文件 -->
+    <property name="configLocation"
+              value="classpath:mybatis/SqlMapConfig.xml"></property>
+</bean>
+
+<!-- 加载 mapper接口 -->
+<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="com.top.mapper"></property>
+</bean>
+```
+
+### 问题三：jar 已经导入，配置也正常，但把项目拉到其他地方运行报错
+
+`解决方法`：问题出现在 `Artifacts` 里出现`多个部署文`件，导致冲突。`最简单的就是把之前的部署文件删除，重新 build`。
+
+![](https://imgkr2.cn-bj.ufileos.com/74ddfe82-b628-4c31-ad50-109e4ff1d749.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=pwL61TfEWCzJkxvHupp8ZhMN%252FBY%253D&Expires=1597622002)
+
+
+## 总结
+
+只需要依次排查这三个问题即可完美解决问题，还用再担心有bug嘛，不要怕遇到问题，找我就对了，没毛病！别着急，还有更多的秘密等着你来探索！
+
+
+![](https://imgkr2.cn-bj.ufileos.com/74259656-f59a-420f-8d13-a9f3702d7164.jpg?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=HBVTm24FEHwSf%252Fbv%252B40Y2seNEiM%253D&Expires=1597622700)
+
+
+分享嗨起来，在看点起来，美德传起来，点个星标从此探索之路不迷茫

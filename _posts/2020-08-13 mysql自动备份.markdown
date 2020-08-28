@@ -1,0 +1,235 @@
+# Linux 下配置每天定时自动备份 MySQL 数据库
+
+## 引言
+
+后台开发人员在日常中难免会遇到服务器崩溃，或未提前查看服务器到期时间、手误等等等等很多原因导致数据库数据丢失，这时候日常中随时备份的数据库，就如雪中送炭般，让你不再担忧！或因客户的要求，需要将数据库进行每天定时自动备份！
+
+不论如何日常中备份数据，这对于后台开发人员来说必不可少的
+
+那说了半天备份数据库了，那到底该如何备份呢，今天我们就来详细的分解下，Linux 下如何配置每天定时自动备份 MySQL 数据库，以免小伙伴们入坑！能少走一些弯路！
+
+## 备份步骤
+
+- **首先我们创建一个备份的目录，便于查看，管理**
+
+  我这里就将文件保存备份在 `/home/centos` 目录下，操作以下命令：
+
+
+    ```shell
+
+      $ cd
+
+      $ mkdir /home/centos/dbback
+
+      $ cd /home/centos/dbback
+
+    ```
+
+- **接下来创建备份数据库的 `Shell` 脚本**
+
+  ```shell
+    $ cd /home/centos/backup/
+
+  ```
+
+
+    ```shell
+      $ vim bkDatabaseName.sh
+
+    ```
+
+    此处可以将命令中的 `DatabaseName` 更换为自己实际的数据库名称，根据自己需求而定！
+
+- **然后编辑脚本添加内容**
+
+  1. 点击 键盘字母 **`i`** 进入编辑模式
+
+  2. 复制粘贴以下内容
+
+
+        ```shell
+
+          #!/bin/bash
+
+          mysqldump -uusername -ppassword DatabaseName > /home/centos/dbback/DatabaseName_$(date +%Y%m%d_%H%M%S).sql
+
+        ```
+
+  3. 若需将备份的 sql 内容进行压缩，可复制以下内容
+
+     ```shell
+
+       #!/bin/bash
+
+       mysqldump -uusername -ppassword DatabaseName | gzip > /home/centos/dbback/DatabaseName_$(date +%Y%m%d_%H%M%S).sql.gz
+
+     ```
+
+
+      **注意：**
+
+        将 `username` 替换为`实际的数据库用户名`；
+
+        将 `password` 替换为`实际的数据库密码`；
+
+        将 `DatabaseName` 替换为`实际的数据库名`；
+
+- **为编辑的 `Shell` 脚本添加可执行权限**
+
+  ```shell
+    $ chmod u+x bkDatabaseName.sh
+
+  ```
+
+- **添加可执行权限之后先执行一下，看看脚本有没有错误，可不可以正常执行**
+
+  ```shell
+    $ ./bkDatabaseName.sh
+
+  ```
+
+  **注意**：
+
+  这里可能会报错（`如未出错直接查看下一步添加计划任务，此处可不用查看`）
+
+    ```bash
+      mysqldump: [Warning] Using a password on the command line interface can be insecure.
+
+    ```
+
+    导出 MySQL 数据库的时候采用 `mysqldump` 命令，出现"`Warning: Using a password on the command line interface can be insecure.`"的错误提示，这时候查看文件夹中数据库也没有能备份下来。这个问题应该是在 `MySQL5.6+` 版本的时候就有出现，可能是为了确保数据库的安全性采用的保护机制。
+
+  **_`解决方法`_**
+
+    1. 修改数据库配置文件，根据自己的数据库安装所在目录进行配置，默认是在 `/etc/my.cnf`
+
+         ```shell
+           $ vim /etc/my.cnf
+
+         ```
+
+    2. 在 `[client]` 部分添加脚本：
+
+
+          ```
+            host = localhost
+            user = 数据库用户
+            password = '数据库密码'
+
+          ```
+        
+        用户和数据库密码要修改为自己的用户和密码
+
+    3. 修改完后，我习惯性的重启了`mysql服务`，再同样执行备份命令，发现文件夹中数据却备份成功了，但是命令执行完成还是出现错误。没办法虽然数据备份成功了，可我也不想看到错误，只能再查找解决办法，最后在官网查看到了说明。地址在下方：
+
+       > https://dev.mysql.com/doc/refman/5.6/en/password-security-user.html?spm=5176.7737807.2.3.D6p7hh
+
+    4. 阅读完了，官方手册后，我知道了最完美的解决方案，`前方高能~~~`
+        
+    
+    5. `最终版备份导出数据库`命令
+
+       ```bash
+         /usr/local/mysql/bin/mysqldump --defaults-extra-file=/etc/my.cnf DatabaseName > /home/centos/dbback/DatabaseName_$(date +%Y%m%d_%H%M%S).sql    //备份导出数据库
+
+       ```
+     6. （附带）`导入数据库`
+
+        ```bash
+          /usr/local/mysql/bin/mysql --defaults-extra-file=/etc/my.cnf DatabaseName < /home/centos/dbback/DatabaseName_$(date +%Y%m%d_%H%M%S).sql          //导入数据库
+
+         ```
+
+        这里我们可以看到上面的命令和以前常用的快速导出有所不同了，需要加载我们配置的 `MySQL配置文件`，路径要根据我们实际的路径修改。用这样的命令导出备份和导入是没有错误提示的
+
+         这时候查看 `/home/centos/dbback` 下，发现想要的数据库备份文件出现了~
+
+- **接下来添加计划任务**
+
+  - 首先检测或安装 `crontab`
+
+    确认 `crontab` 是否安装
+
+     ```shell
+       $ crontab
+
+     ```
+
+    若执行出现
+
+     ```bash
+       -bash: crontab: command not found
+
+     ```
+
+     就表明系统没有安装 `crontab` 需要安装 crontab
+
+  -  安装 crontab
+
+      首先安装 cron 的主程序 `vixie-cron` 软件包
+
+     ```shell
+       $ yum -y install vixie-cron
+
+     ```
+
+      接下来安装 `crontabs` 软件包， 它是用来安装、卸装、或列举用来驱动 cron 守护进程的表格的程序
+
+     ```
+       $ yum -y install crontabs
+
+     ```
+
+  - 安装成功以后，添加计划任务
+
+     执行以下命令
+
+     ```
+       $ crontab -e
+
+     ```
+
+     此时就跟使用 `vim` 编辑器一样，可以对计划任务进行编辑
+
+     输入以下内容：
+
+     ```
+       */1 * * * * /home/centos/backup/bkDatabaseName.sh
+
+     ```
+
+     具体是什么意思呢？
+
+     意思是`每一分钟`执行一次 shell 脚本“`/home/centos/backup/bkDatabaseName.sh`”。
+
+     此时退出，保存文件。计划任务就设置成功了。
+
+* **最后测试计划任务是否可以执行**
+
+  测试很简单，我们就执行几次“ `ls` ” 或“ `ll` ”命令，看看一分钟过后备份的数据库文件有没有被创建就可以了！
+  
+  ![](https://imgkr2.cn-bj.ufileos.com/a268b787-4c58-4628-9bab-35182c14e6f3.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=umom4Ac%252Ba7zjfxuUgHo1MaAoXfU%253D&Expires=1597416035)
+
+
+  如果任务执行失败了，可以通过以下命令查看任务日志
+
+    ```shell
+      $ tail -f /var/log/cron
+
+    ```
+
+  输出结果类似下图，可查看到任务执行了！查看文件夹已有备份的数据库文件！
+  
+  ![](https://imgkr2.cn-bj.ufileos.com/8e8c8a20-247f-48a2-9af3-cadf07ef45da.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=U%252BAPjguiAsfp9kmW%252FzOoplEiLr8%253D&Expires=1597416059)
+![](https://imgkr2.cn-bj.ufileos.com/538d503e-e842-489c-a906-157cc932aca7.png?UCloudPublicKey=TOKEN_8d8b72be-579a-4e83-bfd0-5f6ce1546f13&Signature=VpS%252Bt7McODLnLruBEjBckQJrmMU%253D&Expires=1597416059)
+
+
+PS: 具体的 `crontab` 用法，我们下文再叙！
+
+## 总结
+
+配置好了以后，再也不用担心数据丢失了，再也不怕服务器宕机、手误删库跑路了！统统不在话下！赶快去配置吧，别着急，还有更多的秘密等着你来探索！
+
+
+
+分享嗨起来，在看点起来，美德传起来，点个星标从此探索之路不迷茫！
